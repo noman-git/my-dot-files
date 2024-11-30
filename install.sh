@@ -1,28 +1,28 @@
 #!/bin/bash
 
-# # Function to detect the OS
-# detect_os() {
-#   OS="unknown"
-#   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-#     OS="linux"
-#   elif [[ "$OSTYPE" == "darwin"* ]]; then
-#     OS="macos"
-#   fi
-#   echo "$OS"
-# }
+# Function to detect the OS
+detect_os() {
+  OS="unknown"
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    OS="linux"
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    OS="macos"
+  fi
+  echo "$OS"
+}
 
-# # Install Nix
-# install_nix() {
-#   OS=$(detect_os)
-#   if [[ "$OS" == "linux" ]]; then
-#     sh <(curl -L https://nixos.org/nix/install) --daemon
-#   elif [[ "$OS" == "macos" ]]; then
-#     sh <(curl -L https://nixos.org/nix/install)
-#   else
-#     echo "Unsupported OS: $OS"
-#     exit 1
-#   fi
-# }
+# Install Nix
+install_nix() {
+  OS=$(detect_os)
+  if [[ "$OS" == "linux" ]]; then
+    sh <(curl -L https://nixos.org/nix/install) --daemon
+  elif [[ "$OS" == "macos" ]]; then
+    sh <(curl -L https://nixos.org/nix/install)
+  else
+    echo "Unsupported OS: $OS"
+    exit 1
+  fi
+}
 
 
 setup_git() {
@@ -72,12 +72,13 @@ install_packages() {
     nixpkgs.fzf \
     nixpkgs.ripgrep \
     nixpkgs.bat \
-    nixpkgs.zoxide 
+    nixpkgs.zoxide \
+    nixpkgs.imagemagick
 }
 
 # Main function
 main() {
-  # install_nix
+  install_nix
 #  setup_git
   install_packages
   stow git

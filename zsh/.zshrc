@@ -37,10 +37,10 @@ zinit cdreplay -q
 
 # Keybindings
 bindkey '^y' autosuggest-accept
-bindkey '^[[1;5D' backward-word  # Ctrl-Left for backward word
-bindkey '^[[1;5C' forward-word   # Ctrl-Right for forward word
-bindkey '^[[1;5A' history-search-backward
-bindkey '^[[1;5B' history-search-forward
+bindkey '^h' backward-word  # Ctrl-Left for backward word
+bindkey '^l' forward-word   # Ctrl-Right for forward word
+bindkey '^k' history-search-backward
+bindkey '^j' history-search-forward
 
 # History Settings
 HISTSIZE=5000
@@ -106,3 +106,7 @@ eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 
 export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
+
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
