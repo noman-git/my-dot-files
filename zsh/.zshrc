@@ -63,6 +63,7 @@ alias c='clear'
 alias pvc='python3 -m venv venv && source venv/bin/activate'
 alias pvm='if [[ -n "$VIRTUAL_ENV" ]]; then pip install pynvim jupyter_client ueberzug Pillow cairosvg pnglatex plotly kaleido pyperclip; else echo "Not in a virtual environment. Use pvc to create and activate one."; fi'
 alias pva='source venv/bin/activate'
+alias pir='pip install -r requirements.txt'
 
 
 
