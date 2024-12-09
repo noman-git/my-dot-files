@@ -75,7 +75,8 @@ alias tma='tmux attach -t'
 # Attach to last session
 alias tmal='tmux attach'
 # List all tmux sessions
-alias tmls='tmux list-sessions'
+# tmux session picker
+alias tmls='session=$(tmux ls | fzf | awk -F: "{print \$1}"); [ -n "$session" ] && tmux attach-session -t "$session"'
 # Kill a specific session by name
 alias tmsk='tmux kill-session -t'
 # Kill the current session from within tmux
