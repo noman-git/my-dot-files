@@ -32,19 +32,16 @@ install_yay() {
 # Install essential packages
 install_packages() {
   echo "Installing packages..."
-
   sudo pacman -S --needed --noconfirm \
     zsh neovim tmux stow yarn fzf ripgrep bat zoxide imagemagick
 
   # Install additional tools from AUR
-  yay -S --needed --noconfirm \
-    nerd-fonts-jetbrains-mono lsix vv
+  yay -S --needed --noconfirm nerd-fonts-jetbrains-mono
 }
 
-# Set up Git
+# Set up Git (optional)
 setup_git() {
   echo "Setting up git..."
-
   if ! command -v git &>/dev/null; then
     echo "Git is not installed. Installing..."
     sudo pacman -S --noconfirm git
@@ -60,31 +57,30 @@ setup_git() {
   echo "Git configured successfully!"
 }
 
-# Set up Zsh
-setup_zsh() {
-  echo "Setting up zsh..."
+# Stow dotfiles packages
+stow_dotfiles() {
+  echo "Stowing dotfiles..."
 
-  if ! grep -q "$(which zsh)" /etc/shells; then
-    echo "$(which zsh)" | sudo tee -a /etc/shells
-  fi
-
-  if [[ "$SHELL" != "$(which zsh)" ]]; then
-    chsh -s "$(which zsh)"
-    echo "Default shell changed to Zsh. Restart your terminal."
-  fi
+  # These stow commands assume your dotfiles repo is organized by package:
+  # e.g., a folder named "git" for git configs,
+  #       "zsh" for zsh configs,
+  #       "kitty" for kitty configs, and
+  #       "tmux-powerline" for tmux-powerline configs.
+  stow git
+  stow zsh
+  stow kitty
+  stow tmux-powerline
 }
 
 # Main function
 main() {
   install_yay
   install_packages
-  # setup_git  # Uncomment if needed
-  stow git
-  stow zsh
-  setup_zsh
-  sudo pacman -S nodejs npm
-
-  echo "Installation completed! Restart your terminal to apply changes."
+  # Uncomment the next line if you want to set up git interactively.
+  # setup_git
+  stow_dotfiles
+  sudo pacman -S --needed --noconfirm nodejs npm
 }
 
 main
+

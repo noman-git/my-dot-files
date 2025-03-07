@@ -46,28 +46,8 @@ setup_lua() {
   fi
 }
 
-# Function to install Node.js and npm using nix
-setup_node() {
-  echo "Setting up Node.js and npm..."
-
-  # Use nix to install Node.js and npm
-  if command -v nix-env &> /dev/null; then
-    nix-env -iA nixpkgs.nodejs_22
-  else
-    echo "Error: nix not found. Exiting."
-    exit 1
-  fi
-
-  # Verify installation
-  if command -v node &> /dev/null && command -v npm &> /dev/null; then
-    echo "Node.js and npm installed successfully!"
-  else
-    echo "Failed to install Node.js and npm"
-  fi
-}
 
 # Run all setup functions
 setup_pyenv_and_python
 setup_lua
-setup_node
 
