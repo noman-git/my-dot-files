@@ -114,6 +114,7 @@ fi
 # shellcheck disable=SC1143,SC2128
 if [ -z "$TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS" ]; then
 	TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS=(
-		"disk_usage 160 195"
+        "time 6 160"
+		"disk_usage 160 6"
 	)
 fi
