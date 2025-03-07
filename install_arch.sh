@@ -79,7 +79,6 @@ main() {
   # Uncomment the next line if you want to set up git interactively.
   # setup_git
   stow_dotfiles
-  sudo pacman -S --needed --noconfirm nodejs npm
 }
 
 main
