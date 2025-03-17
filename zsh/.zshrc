@@ -102,6 +102,12 @@ alias tmwt='tmux last-window'
 alias tmwn='tmux next-window'
 alias tmwp='tmux previous-window'
 
+alias gnome-tweaks='/usr/bin/python /usr/bin/gnome-tweaks'
+alias ws='curl https://www.cloudflare.com/cdn-cgi/trace/'
+alias wo='sudo systemctl start warp-svc'
+alias wc='warp-cli connect'
+alias wd='warp-cli disconnect'
+
 
 # Shell integrations
 eval "$(fzf --zsh)"
@@ -116,4 +122,3 @@ eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
-alias gnome-tweaks='/usr/bin/python /usr/bin/gnome-tweaks'
