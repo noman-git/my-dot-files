@@ -109,6 +109,8 @@ alias wc='warp-cli connect'
 alias wd='warp-cli disconnect'
 
 
+alias open='xdg-open'
+
 # Shell integrations
 eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
