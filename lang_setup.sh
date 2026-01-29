@@ -1,79 +1,100 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Function to set up pyenv and install Python 3.12 using pyenv via pacman
+PYTHON_VERSION="3.12.2"
+VENV_DIR="$HOME/.virtualenvs/neovim"
+
+echo "==> Starting environment setup..."
+
+# -------------------------------
+# PYENV + PYTHON
+# -------------------------------
 setup_pyenv_and_python() {
-  echo "Setting up pyenv and Python 3.12..."
+  echo "==> Installing pyenv..."
 
-  # Install pyenv and pyenv-virtualenv
-  sudo pacman -S --needed --noconfirm pyenv pyenv-virtualenv
+  sudo pacman -S --needed --noconfirm \
+    pyenv \
+    base-devel \
+    openssl \
+    zlib \
+    xz \
+    tk
 
-  # Set up pyenv environment variables
   export PYENV_ROOT="$HOME/.pyenv"
   export PATH="$PYENV_ROOT/bin:$PATH"
 
-  # Initialize pyenv (should be added to shell profile for persistence)
   eval "$(pyenv init --path)"
   eval "$(pyenv init -)"
-  eval "$(pyenv virtualenv-init -)"
 
-  # Install Python 3.12 using pyenv (if not already installed)
-  if ! pyenv versions | grep -q "3.12.2"; then
-    pyenv install 3.12.2
+  if ! pyenv versions --bare | grep -qx "$PYTHON_VERSION"; then
+    echo "==> Installing Python $PYTHON_VERSION..."
+    pyenv install "$PYTHON_VERSION"
   fi
-  pyenv global 3.12.2
 
-  # Create a virtual environment for Neovim
-  if ! pyenv virtualenvs | grep -q "neovim"; then
-    pyenv virtualenv 3.12.2 neovim
+  pyenv global "$PYTHON_VERSION"
+
+  echo "==> Creating Neovim virtualenv..."
+  mkdir -p "$(dirname "$VENV_DIR")"
+
+  if [[ ! -d "$VENV_DIR" ]]; then
+    python -m venv "$VENV_DIR"
   fi
-  pyenv activate neovim
 
-  # Install pynvim inside the virtual environment
+  # Activate venv
+  source "$VENV_DIR/bin/activate"
+
+  echo "==> Installing Python packages..."
   pip install --upgrade pip
-  pip install pynvim jupyter-client cairosvg pnglatex plotly kaleido pyperclip pillow
+  pip install \
+    pynvim \
+    jupyter-client \
+    cairosvg \
+    pnglatex \
+    plotly \
+    kaleido \
+    pyperclip \
+    pillow
 
-  # Verify installation
-  if pyenv versions | grep "3.12" &>/dev/null; then
-    echo "Python 3.12 installed successfully!"
-  else
-    echo "Failed to install Python 3.12"
-  fi
+  echo "==> Python setup complete"
 }
 
-# Function to install Lua 5.4 using AUR (yay)
+# -------------------------------
+# LUA 5.4
+# -------------------------------
 setup_lua() {
-  echo "Setting up Lua 5.4..."
+  echo "==> Installing Lua 5.4..."
 
-  # Ensure yay is installed
   if ! command -v yay &>/dev/null; then
-    echo "Installing yay..."
-    sudo pacman -S --needed --noconfirm base-devel git
+    echo "==> Installing yay..."
+    sudo pacman -S --needed --noconfirm git base-devel
     git clone https://aur.archlinux.org/yay.git /tmp/yay
-    cd /tmp/yay || exit
+    pushd /tmp/yay
     makepkg -si --noconfirm
-    cd - || exit
+    popd
     rm -rf /tmp/yay
   fi
 
-  # Install Lua 5.4
   yay -S --needed --noconfirm lua54
 
-  echo "Lua version:"
   lua -v
 }
 
-# Function to install Node.js and npm using pacman
+# -------------------------------
+# NODE.JS
+# -------------------------------
 setup_node() {
-  echo "Setting up Node.js and npm..."
+  echo "==> Installing Node.js..."
   sudo pacman -S --needed --noconfirm nodejs npm
 }
 
-# Main function to run all setups
+# -------------------------------
+# MAIN
+# -------------------------------
 main() {
   setup_pyenv_and_python
   setup_lua
   setup_node
+  echo "==> All done."
 }
 
 main
