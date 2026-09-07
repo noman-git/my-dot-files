@@ -1,0 +1,19 @@
+# Installed with yay. yay-bin first so the helper exists.
+yay-bin
+wallust
+wlogout
+gtk-engine-murrine
+ttf-victor-mono
+pokemon-colorscripts-git
+zen-browser-bin
+google-chrome
+visual-studio-code-bin
+slack-desktop
+postman-bin
+xnviewmp
+nordvpn-bin
+cloudflared-bin
+infisical-bin
+atlas-bin
+lemonade-bin
+overskride

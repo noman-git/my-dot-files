@@ -1,0 +1,19 @@
+# Hardware and kernel inspection. Most come from the linux-tools split
+# packages and were installed together; prune freely.
+perf
+bpf
+cpupower
+turbostat
+x86_energy_perf_policy
+tmon
+kcpuid
+bootconfig
+usbip
+hyperv
+umockdev
+mokutil
+inxi
+mesa-utils
+vulkan-tools
+libva
+libspng

@@ -1,0 +1,9 @@
+# Personal GUI and media apps not needed by the desktop scripts.
+obsidian
+qbittorrent
+yt-dlp
+dbeaver
+zathura
+zathura-pdf-poppler
+nsxiv
+imv

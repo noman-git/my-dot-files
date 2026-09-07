@@ -1,0 +1,6 @@
+# Installed when /proc/cpuinfo says GenuineIntel. An AMD machine needs
+# amd-ucode and the mesa/vulkan-radeon set instead.
+intel-ucode
+intel-media-driver
+vulkan-intel
+intel-speed-select

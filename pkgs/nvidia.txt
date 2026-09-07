@@ -1,0 +1,9 @@
+# Installed only when an NVIDIA GPU is detected (PCI vendor 0x10de).
+# nvidia-open is the prebuilt module for the stock linux kernel. Another
+# kernel needs nvidia-open-dkms and its headers instead.
+nvidia-open
+nvidia-utils
+nvidia-prime
+nvidia-settings
+libva-nvidia-driver
+nvtop
