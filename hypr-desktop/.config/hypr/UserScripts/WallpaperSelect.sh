@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */
 # This script for selecting wallpapers (SUPER W)
+# Images only. The upstream video wallpaper path (mpvpaper plus edits to
+# Startup_Apps.conf) was removed: mpvpaper is not installed and the .conf
+# file is gone since the Lua migration.
 
 # WALLPAPERS PATH
 terminal=kitty
@@ -47,14 +50,6 @@ icon_size=$(echo "scale=1; ($monitor_height * 3) / ($scale_factor * 150)" | bc)
 adjusted_icon_size=$(echo "$icon_size" | awk '{if ($1 < 15) $1 = 20; if ($1 > 25) $1 = 25; print $1}')
 rofi_override="element-icon{size:${adjusted_icon_size}%;}"
 
-# Kill existing wallpaper daemons for video
-kill_wallpaper_for_video() {
-  swww kill 2>/dev/null
-  pkill mpvpaper 2>/dev/null
-  pkill swaybg 2>/dev/null
-  pkill hyprpaper 2>/dev/null
-}
-
 # Kill existing wallpaper daemons for image
 kill_wallpaper_for_image() {
   pkill mpvpaper 2>/dev/null
@@ -62,11 +57,10 @@ kill_wallpaper_for_image() {
   pkill hyprpaper 2>/dev/null
 }
 
-# Retrieve wallpapers (both images & videos)
+# Retrieve wallpapers (images)
 mapfile -d '' PICS < <(find -L "${wallDIR}" -type f \( \
   -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o \
-  -iname "*.bmp" -o -iname "*.tiff" -o -iname "*.webp" -o \
-  -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.webm" \) -print0)
+  -iname "*.bmp" -o -iname "*.tiff" -o -iname "*.webp" \) -print0)
 
 RANDOM_PIC="${PICS[$((RANDOM % ${#PICS[@]}))]}"
 RANDOM_PIC_NAME=". random"
@@ -95,20 +89,13 @@ menu() {
         magick "$pic_path[0]" -resize 1920x1080 "$cache_gif_image"
       fi
       printf "%s\x00icon\x1f%s\n" "$pic_name" "$cache_gif_image"
-    elif [[ "$pic_name" =~ \.(mp4|mkv|mov|webm|MP4|MKV|MOV|WEBM)$ ]]; then
-      cache_preview_image="$HOME/.cache/video_preview/${pic_name}.png"
-      if [[ ! -f "$cache_preview_image" ]]; then
-        mkdir -p "$HOME/.cache/video_preview"
-        ffmpeg -v error -y -i "$pic_path" -ss 00:00:01.000 -vframes 1 "$cache_preview_image"
-      fi
-      printf "%s\x00icon\x1f%s\n" "$pic_name" "$cache_preview_image"
     else
       printf "%s\x00icon\x1f%s\n" "$pic_name" "$pic_path"
     fi
   done
 }
 
-# Offer SDDM Simple Wallpaper Option (only for non-video wallpapers)
+# Offer SDDM Simple Wallpaper Option
 set_sddm_wallpaper() {
   sleep 1
 
@@ -152,33 +139,6 @@ set_sddm_wallpaper() {
   fi
 }
 
-modify_startup_config() {
-  local selected_file="$1"
-  local startup_config="$HOME/.config/hypr/UserConfigs/Startup_Apps.conf"
-  # Startup_Apps.conf is gone since the Lua migration; the mpvpaper toggle is dead until ported.
-  [ -f "$startup_config" ] || return 0
-
-  # Check if it's a live wallpaper (video)
-  if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm)$ ]]; then
-    # For video wallpapers:
-    sed -i '/^\s*exec-once\s*=\s*swww-daemon\s*--format\s*xrgb\s*$/s/^/\#/' "$startup_config"
-    sed -i '/^\s*#\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^#\s*//;' "$startup_config"
-
-    # Update the livewallpaper variable with the selected video path (using $HOME)
-    selected_file="${selected_file/#$HOME/\$HOME}" # Replace /home/user with $HOME
-    sed -i "s|^\$livewallpaper=.*|\$livewallpaper=\"$selected_file\"|" "$startup_config"
-
-    echo "Configured for live wallpaper (video)."
-  else
-    # For image wallpapers:
-    sed -i '/^\s*#\s*exec-once\s*=\s*swww-daemon\s*--format\s*xrgb\s*$/s/^\s*#\s*//;' "$startup_config"
-
-    sed -i '/^\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^/\#/' "$startup_config"
-
-    echo "Configured for static wallpaper (image)."
-  fi
-}
-
 # Apply Image Wallpaper
 apply_image_wallpaper() {
   local image_path="$1"
@@ -199,20 +159,6 @@ apply_image_wallpaper() {
   sleep 1
 
   set_sddm_wallpaper
-}
-
-apply_video_wallpaper() {
-  local video_path="$1"
-
-  # Check if mpvpaper is installed
-  if ! command -v mpvpaper &>/dev/null; then
-    notify-send -i "$iDIR/error.png" "E-R-R-O-R" "mpvpaper not found"
-    return 1
-  fi
-  kill_wallpaper_for_video
-
-  # Apply video wallpaper using mpvpaper
-  mpvpaper '*' -o "load-scripts=no no-audio --loop" "$video_path" &
 }
 
 # Main function
@@ -252,15 +198,7 @@ main() {
     exit 1
   fi
 
-  # Modify the Startup_Apps.conf file based on wallpaper type
-  modify_startup_config "$selected_file"
-
-  # **CHECK FIRST** if it's a video or an image **before calling any function**
-  if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm|MP4|MKV|MOV|WEBM)$ ]]; then
-    apply_video_wallpaper "$selected_file"
-  else
-    apply_image_wallpaper "$selected_file"
-  fi
+  apply_image_wallpaper "$selected_file"
 }
 
 # Check if rofi is already running

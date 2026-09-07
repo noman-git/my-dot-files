@@ -43,6 +43,10 @@ setup_shell.sh        chsh to zsh
 5. `cd ~/my-dot-files && ./install_arch.sh`
    Flags: `--nvidia` or `--no-nvidia` to override detection, `--dev-services`
    to enable docker, postgresql and valkey, `--skip-aur`, `--no-system`.
+   Cursor, GTK and icon themes (Bibata-Modern-Ice, Flat-Remix) come from the
+   AUR packages in `pkgs/aur.txt`. On the first laptop the JaKooLit installer
+   had extracted them into `~/.icons` and `~/.themes` instead (664 MB, not in
+   git); both locations work.
 6. Reboot and pick Hyprland in SDDM.
 7. Run `nwg-displays`, save, then `hypr-normalize-monitors`. The committed
    `monitors.lua` and `workspaces.lua` describe this laptop (eDP-1
@@ -86,6 +90,13 @@ to the dGPU. On an NVIDIA-only machine, uncomment them there.
 not in the initramfs and loads after early boot; `install_system.sh` warns if
 `MODULES` is not empty.
 
+Opt-in, not yet tested on this laptop: `sudo ./install_system.sh --sddm-wayland`
+installs `/etc/sddm.conf.d/10-wayland.conf`, which runs the SDDM greeter on
+Wayland (weston kiosk, SDDM's default Wayland compositor; install `weston`
+first). The Xorg greeter holds the dGPU awake and blocks D3cold. If the
+greeter does not come up, switch to a TTY and remove the file; the header of
+the file has the commands.
+
 ## Hyprland
 
 The config is Lua (`hyprland.lua` plus `lua/*.lua`), converted from the
@@ -118,7 +129,7 @@ Stow links whole directories, so programs write into the repo working tree.
 Tracked files that the theme scripts edit in place, committed in the Dark
 state: `wallust/wallust.toml`, `swaync/style.css`, `qt5ct/qt5ct.conf`,
 `qt6ct/qt6ct.conf`, `wallust/templates/colors-rofi.rasi`, `rofi/config.rasi`
-(RofiThemeSelector.sh appends a `@theme` line per switch), `kitty/kitty.conf`.
+(one `@theme` line, replaced by RofiThemeSelector.sh), `kitty/kitty.conf`.
 After a Dark/Light toggle or a theme pick, `git status` shows them modified;
 commit or `git checkout` them.
 
@@ -162,8 +173,10 @@ wallust run.
   `KeyBinds.sh`, `KeyHints.sh`, `Kool_Quick_Settings.sh`,
   `SwitchKeyboardLayout.sh`, `Tak0-Autodispatch.sh`, `Tak0-Per-Window-Switch.sh`,
   `TouchPad.sh`, `UserScripts/RainbowBorders.sh`, `UserScripts/WallpaperRandom.sh`,
-  `UserScripts/WallpaperSelect.sh`; `Refresh.sh` and `RefreshNoWaybar.sh`
-  relaunch quickshell with `-c overview`.
+  `UserScripts/WallpaperSelect.sh` (images only, the mpvpaper video path is
+  removed); `Refresh.sh` and `RefreshNoWaybar.sh` relaunch quickshell with
+  `-c overview`; `RofiThemeSelector.sh` replaces the `@theme` line instead of
+  appending one per switch (the upstream sed failed on its own delimiter).
 - Custom, not upstream: `UserScripts/WallpaperModeShuffle.sh`,
   `WallpaperShuffleStop.sh`, `WallpaperStartup.sh`, `NordVPN.sh`,
   `rofi/config-nordvpn.rasi`, `gtk-3.0/gtk.css` (compact tray menus),
@@ -173,15 +186,14 @@ wallust run.
 
 ## Known follow-ups
 
-- Referenced by the config but not installed: `hyprsunset` (startup and a
-  waybar module), `bibata-cursor-theme` (`HYPRCURSOR_THEME`), Flat-Remix GTK
-  and icon themes (`initial-boot.sh`, qt6ct).
-- `rofi/config.rasi` carries one `@theme` line per past theme switch; only
-  the last one counts.
-- `kitty/kitty.conf` points `background_image` at a file that does not exist.
-- The mpvpaper video wallpaper path in `WallpaperSelect.sh` is dead under
-  Lua; the script returns early instead of editing a file that is gone.
-- `yay-bin-debug` is installed here but not listed; `pacman -Rns yay-bin-debug`.
-- Open items on this laptop: a Wayland SDDM greeter drop-in (the Xorg
-  greeter holds the dGPU awake), and `IgnorePkg = tmux` if the tmux 3.7
-  dot-fill returns.
+- rofi 2.0 changed the listview default to `flow: horizontal`. Only
+  `themes/KooL_style-4.rasi` and `config-nordvpn.rasi` carry the
+  `flow: vertical` fix; another theme picked with the selector may need the
+  same line in its `listview` block.
+- The SDDM Wayland greeter drop-in (`--sddm-wayland`) is prepared but not
+  tested here; it needs `weston` and a logout to try.
+- `IgnorePkg = tmux` in pacman.conf if the tmux 3.7 dot-fill returns
+  (see `configure_pacman` in install_system.sh for where it would go).
+- `gsettings get org.gnome.desktop.interface cursor-theme` is `default` on
+  this laptop although `HYPRCURSOR_THEME` is Bibata-Modern-Ice; `initial-boot.sh`
+  sets it on the first login only.

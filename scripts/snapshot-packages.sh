@@ -26,9 +26,10 @@ done
 
 listed_native=$(pkg_list "${native_lists[@]}")
 listed_aur=$(pkg_list "$PKGS/aur.txt")
-explicit_native=$(pacman -Qqen | sort)
+# *-debug packages are makepkg by-products, never listed.
+explicit_native=$(pacman -Qqen | grep -v -- '-debug$' | sort)
 all_native=$(pacman -Qqn | sort)
-explicit_aur=$(pacman -Qqem | sort)
+explicit_aur=$(pacman -Qqem | grep -v -- '-debug$' | sort)
 all_aur=$(pacman -Qqm | sort)
 
 unlisted_native=$(comm -23 <(echo "$explicit_native") <(echo "$listed_native"))

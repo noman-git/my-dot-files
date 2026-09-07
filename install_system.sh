@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # System-level setup for an Arch machine, from the system/ tree in this repo.
 #
-#   sudo ./install_system.sh [--nvidia|--no-nvidia] [--dev-services] [--no-boot] [--pacman-only] [--dry-run]
+#   sudo ./install_system.sh [--nvidia|--no-nvidia] [--dev-services] [--sddm-wayland] [--no-boot] [--pacman-only] [--dry-run]
 #
 # Every step is idempotent. Files are compared before they are written and
 # each step reports what it changed. --dry-run needs no root and prints the
@@ -17,6 +17,7 @@
 #   swww            symlinks to awww for the JaKooLit scripts
 #   groups          uinput, input, wheel (+docker, nordvpn when relevant)
 #   services        desktop set, plus docker/postgresql/valkey with --dev-services
+#   --sddm-wayland  opt-in drop-in that runs the SDDM greeter on Wayland (needs weston)
 #
 # NVIDIA is detected from PCI vendor 0x10de with a display class. The flags
 # override detection. mkinitcpio.conf is left alone: this setup depends on an
@@ -28,6 +29,7 @@ SYS="$REPO/system"
 
 NVIDIA=auto
 DEV_SERVICES=0
+SDDM_WAYLAND=0
 DO_BOOT=1
 PACMAN_ONLY=0
 DRY=0
@@ -57,6 +59,7 @@ parse_args() {
       --nvidia) NVIDIA=yes ;;
       --no-nvidia) NVIDIA=no ;;
       --dev-services) DEV_SERVICES=1 ;;
+      --sddm-wayland) SDDM_WAYLAND=1 ;;
       --no-boot) DO_BOOT=0 ;;
       --pacman-only) PACMAN_ONLY=1 ;;
       --dry-run) DRY=1 ;;
@@ -225,6 +228,24 @@ install_sddm_theme() {
   install_file "$SYS/usr/share/sddm/themes/simple_sddm_2/theme.conf" "$SDDM_THEME_DIR/theme.conf"
 }
 
+install_sddm_wayland() {
+  log "sddm wayland greeter (opt-in)"
+  if [ "$SDDM_WAYLAND" = 0 ]; then
+    if [ -f /etc/sddm.conf.d/10-wayland.conf ]; then
+      log "  present   /etc/sddm.conf.d/10-wayland.conf (kept; remove it by hand to go back to Xorg)"
+    else
+      log "  not requested (--sddm-wayland)"
+    fi
+    return
+  fi
+  if ! command -v weston >/dev/null 2>&1; then
+    log "  weston is not installed; SDDM's Wayland greeter uses it. Install weston and rerun. Skipped."
+    return
+  fi
+  install_file "$SYS/etc/sddm.conf.d/10-wayland.conf" /etc/sddm.conf.d/10-wayland.conf
+  log "  takes effect at the next SDDM start (logout or reboot). Recovery is in the file header."
+}
+
 setup_swww_compat() {
   log "swww symlinks (JaKooLit scripts call swww, the package is awww)"
   if [ ! -x /usr/bin/awww ]; then log "  awww not installed, skipped"; return; fi
@@ -318,6 +339,7 @@ main() {
   install_etc_nvidia
   configure_boot
   install_sddm_theme
+  install_sddm_wayland
   setup_swww_compat
   setup_groups
   enable_services

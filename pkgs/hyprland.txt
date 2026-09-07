@@ -4,6 +4,7 @@ hyprland
 hypridle
 hyprlock
 hyprpolkitagent
+hyprsunset
 xdg-desktop-portal-hyprland
 xdg-desktop-portal-gtk
 waybar

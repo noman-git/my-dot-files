@@ -3,6 +3,11 @@ yay-bin
 wallust
 wlogout
 gtk-engine-murrine
+# Cursor, GTK and icon themes the config names. On the first laptop the JaKooLit
+# installer extracted them into ~/.icons and ~/.themes (664 MB, not in git).
+bibata-cursor-theme-bin
+flat-remix-gtk
+flat-remix
 ttf-victor-mono
 pokemon-colorscripts-git
 zen-browser-bin

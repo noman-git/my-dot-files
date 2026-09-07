@@ -39,25 +39,16 @@ apply_rofi_theme_to_config() {
   temp_rofi_config_file=$(mktemp)
   cp "$ROFI_CONFIG_FILE" "$temp_rofi_config_file"
 
-  # Comment out any existing @theme entry
-  sed -i -E 's/^(\s*@theme)/\\/\\/\1/' "$temp_rofi_config_file"
-
-  # Add the new @theme entry at the end of the file
+  # Keep exactly one @theme line: drop every existing one (active or commented
+  # out) and append the new one. The upstream version tried to comment the old
+  # line out with a sed whose replacement contained the delimiter, so the sed
+  # failed and the file grew by one @theme line per switch.
+  sed -i -E '/^[[:space:]]*(\/\/[[:space:]]*)?@theme[[:space:]]/d' "$temp_rofi_config_file"
   echo "@theme \"$theme_path_with_tilde\"" >>"$temp_rofi_config_file"
 
   # Overwrite the original config file
   cp "$temp_rofi_config_file" "$ROFI_CONFIG_FILE"
   rm "$temp_rofi_config_file"
-
-  # Prune old commented-out theme lines to prevent clutter
-  local max_lines=10
-  local total_lines=$(grep -c '^//\s*@theme' "$ROFI_CONFIG_FILE")
-  if [ "$total_lines" -gt "$max_lines" ]; then
-    local excess=$((total_lines - max_lines))
-    for ((i = 1; i <= excess; i++)); do
-      sed -i '0,/^\s*\/\/@theme/s///' "$ROFI_CONFIG_FILE"
-    done
-  fi
 
   return 0
 }
