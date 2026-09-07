@@ -103,17 +103,14 @@ alias tmwn='tmux next-window'
 alias tmwp='tmux previous-window'
 
 alias gnome-tweaks='/usr/bin/python /usr/bin/gnome-tweaks'
-alias ws='curl https://www.cloudflare.com/cdn-cgi/trace/'
-alias wo='sudo systemctl start warp-svc'
-alias wc='warp-cli connect'
-alias wd='warp-cli disconnect'
-
 
 alias open='xdg-open'
 
 # Shell integrations
 eval "$(fzf --zsh)"
-eval "$(zoxide init --cmd cd zsh)"
+# fzf's --zsh integration rebinds Tab (^I) to fzf-completion, which clobbers
+# fzf-tab. Restore fzf-tab as the Tab handler (Ctrl-T/Ctrl-R/Alt-C still work).
+bindkey '^I' fzf-tab-complete
 
 export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
 
@@ -128,4 +125,10 @@ export PATH=$PATH:/usr/local/go/bin
 
 . "$HOME/.local/bin/env"
 
+# Keep zoxide init last so nothing can override the `cd` function
+eval "$(zoxide init --cmd cd zsh)"
 
+
+# Use Neovim as the editor (e.g. for `/plan open` in Claude Code)
+export EDITOR=nvim
+export VISUAL=nvim
