@@ -11,7 +11,7 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 # Clone Zinit if not already present
 if [ ! -d "$ZINIT_HOME" ]; then
   mkdir -p "$(dirname $ZINIT_HOME)"
-  git clone git@github.com:zdharma-continuum/zinit.git "$ZINIT_HOME"
+  git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 fi
 
 # Source Zinit
@@ -117,13 +117,16 @@ export PATH="$HOME/.local/share/nvim/mason/bin:$PATH"
 export TERMINAL=kitty
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
+if command -v pyenv >/dev/null 2>&1; then
+  eval "$(pyenv init --path)"
+  eval "$(pyenv init -)"
+fi
 
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH=$PATH:/usr/local/go/bin
 
-. "$HOME/.local/bin/env"
+# uv installer drops this file; absent on a fresh machine
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
 
 # Keep zoxide init last so nothing can override the `cd` function
 eval "$(zoxide init --cmd cd zsh)"

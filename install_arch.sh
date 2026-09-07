@@ -39,24 +39,6 @@ install_packages() {
   yay -S --needed --noconfirm nerd-fonts-jetbrains-mono
 }
 
-# Set up Git (optional)
-setup_git() {
-  echo "Setting up git..."
-  if ! command -v git &>/dev/null; then
-    echo "Git is not installed. Installing..."
-    sudo pacman -S --noconfirm git
-  fi
-
-  read -p "Enter your Git username: " git_username
-  read -p "Enter your Git email: " git_email
-
-  git config --global user.name "$git_username"
-  git config --global user.email "$git_email"
-  git config --global init.defaultBranch main
-
-  echo "Git configured successfully!"
-}
-
 # Stow dotfiles packages
 stow_dotfiles() {
   echo "Stowing dotfiles..."
@@ -68,6 +50,7 @@ stow_dotfiles() {
   #       "tmux-powerline" for tmux-powerline configs.
   stow git
   stow zsh
+  stow tmux
   stow kitty
   stow tmux-powerline
 }
@@ -76,8 +59,6 @@ stow_dotfiles() {
 main() {
   install_yay
   install_packages
-  # Uncomment the next line if you want to set up git interactively.
-  # setup_git
   stow_dotfiles
 }
 

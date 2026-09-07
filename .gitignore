@@ -1,0 +1,2 @@
+# wallust writes a kitty colour theme through the stow symlink; kitty.conf does not include it
+kitty/.config/kitty/kitty-themes/01-Wallust.conf

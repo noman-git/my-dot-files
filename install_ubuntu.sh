@@ -42,25 +42,13 @@ install_nerd_font() {
   rm -rf "$TEMP_DIR"
 }
 
-# Set up Git (optional)
-setup_git() {
-  echo "Setting up git..."
-  read -p "Enter your Git username: " git_username
-  read -p "Enter your Git email: " git_email
-
-  git config --global user.name "$git_username"
-  git config --global user.email "$git_email"
-  git config --global init.defaultBranch main
-
-  echo "Git configured successfully!"
-}
-
 # Stow dotfiles packages
 stow_dotfiles() {
   echo "Stowing dotfiles..."
   # Assumes your dotfiles repo is organized in subdirectories (e.g., git, zsh, kitty, tmux-powerline)
   stow git
   stow zsh
+  stow tmux
   stow kitty
   stow tmux-powerline
 }
@@ -70,8 +58,6 @@ main() {
   install_packages
   # Uncomment the next line if you want to install Nerd Fonts JetBrains Mono.
   # install_nerd_font
-  # Uncomment the next line if you want to set up git interactively.
-  # setup_git
   stow_dotfiles
 }
 
