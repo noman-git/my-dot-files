@@ -1,0 +1,4 @@
+title   Arch Linux (linux)
+linux   /vmlinuz-linux
+initrd  /initramfs-linux.img
+options root=PARTUUID=@ROOT_PARTUUID@ zswap.enabled=0 rw rootfstype=@ROOT_FSTYPE@
