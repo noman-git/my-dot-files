@@ -1,0 +1,12 @@
+/* Compact tray (SNI/dbusmenu) menus so long lists fit more entries on screen.
+   Affects all GTK3 menus. Remove this file to revert. */
+menu menuitem {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    min-height: 0;
+    font-size: 11px;
+}
+menu {
+    padding-top: 0;
+    padding-bottom: 0;
+}

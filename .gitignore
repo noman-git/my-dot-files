@@ -1,2 +1,40 @@
-# wallust writes a kitty colour theme through the stow symlink; kitty.conf does not include it
+# Generated and per-machine state. Stow links whole dirs into ~/.config, so
+# programs write into this working tree. Everything here is regenerated at
+# runtime or by scripts/bootstrap-desktop-state.sh on a fresh machine.
+
+# wallust outputs: one per [templates].target in hypr-desktop/.config/wallust/wallust.toml
+hypr-desktop/.config/hypr/wallust/wallust-hyprland.conf
+hypr-desktop/.config/waybar/wallust/colors-waybar.css
+hypr-desktop/.config/rofi/wallust/colors-rofi.rasi
+hypr-desktop/.config/cava/config
+hypr-desktop/.config/quickshell/qml_color.json
 kitty/.config/kitty/kitty-themes/01-Wallust.conf
+
+# wallpaper state (WallustSwww.sh, WallpaperEffects.sh)
+hypr-desktop/.config/hypr/wallpaper_effects/*
+!hypr-desktop/.config/hypr/wallpaper_effects/.gitkeep
+hypr-desktop/.config/rofi/.current_wallpaper
+
+# switcher symlinks (WaybarLayout.sh, WaybarStyles.sh, DarkLight.sh)
+hypr-desktop/.config/waybar/config
+hypr-desktop/.config/waybar/style.css
+
+# one-shot marker written by initial-boot.sh
+hypr-desktop/.config/hypr/.initial_startup_done
+
+# nwg-displays: hyprlang twins of monitors.lua and workspaces.lua, per-machine profiles
+hypr-desktop/.config/hypr/monitors.conf
+hypr-desktop/.config/hypr/monitors.conf.bak
+hypr-desktop/.config/hypr/workspaces.conf
+hypr-desktop/.config/nwg-displays/active_profile.json
+hypr-desktop/.config/nwg-displays/profiles/
+
+# other programs writing into the folded dirs
+hypr-desktop/.config/gtk-3.0/*
+!hypr-desktop/.config/gtk-3.0/gtk.css
+hypr-desktop/.config/systemd/user/*.wants/
+hypr-desktop/.config/systemd/user/pipewire-session-manager.service
+
+# editor noise
+*.swp
+*~

@@ -1,0 +1,5 @@
+modmap:
+  - name: Arrow remap
+    remap:
+      KEY_PAGEUP: LEFT
+      KEY_PAGEDOWN: RIGHT

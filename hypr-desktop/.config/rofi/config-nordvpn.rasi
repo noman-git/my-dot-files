@@ -1,0 +1,20 @@
+/* Dedicated rofi config for the NordVPN picker.
+ * rofi 2.0 changed the listview default to `flow: horizontal`, which makes the
+ * JaKooLit 1.7-era themes render as a multi-column grid. We reuse the KooL look
+ * but force the classic single-column ("vertical flow") list. */
+@import "~/.config/rofi/0-shared-fonts.rasi"
+@theme "~/.config/rofi/themes/KooL_style-4.rasi"
+
+listview {
+    flow:          vertical;   /* rofi 2.0: restore single-column behavior */
+    columns:       1;
+    lines:         14;
+    fixed-columns: true;
+    dynamic:       false;
+    scrollbar:     true;
+}
+/* rofi 2.0 ignores columns:1 in this session and grids the list to fill width.
+ * Pin a fixed narrow width so a 2nd column physically cannot fit. */
+window {
+    width: 480px;
+}
