@@ -155,6 +155,8 @@ set_sddm_wallpaper() {
 modify_startup_config() {
   local selected_file="$1"
   local startup_config="$HOME/.config/hypr/UserConfigs/Startup_Apps.conf"
+  # Startup_Apps.conf is gone since the Lua migration; the mpvpaper toggle is dead until ported.
+  [ -f "$startup_config" ] || return 0
 
   # Check if it's a live wallpaper (video)
   if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm)$ ]]; then
