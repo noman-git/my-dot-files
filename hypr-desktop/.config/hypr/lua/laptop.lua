@@ -5,7 +5,10 @@ local util = require("lua/util")
 local mainMod = "SUPER"
 local scripts = util.scripts
 
--- hyprctl devices gives the device name.
+-- Device name of this laptop's touchpad (Dell G15 5530). On another machine
+-- run `hyprctl devices -j | jq '.mice[].name'` and put the new name here.
+-- Hyprland ignores hl.device for a name that is not present, so the touchpad
+-- keeps its defaults until then.
 local touchpad = "asue1209:00-04f3:319f-touchpad"
 
 hl.device({

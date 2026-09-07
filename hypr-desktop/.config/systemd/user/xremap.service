@@ -3,7 +3,7 @@ Description=xremap daemon for key remapping
 After=graphical-session.target
 
 [Service]
-ExecStart=/home/noman/.cargo/bin/xremap /home/noman/.config/xremap/config.yml
+ExecStart=%h/.cargo/bin/xremap %h/.config/xremap/config.yml
 Restart=on-failure
 
 [Install]

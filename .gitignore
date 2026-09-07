@@ -25,6 +25,7 @@ hypr-desktop/.config/hypr/.initial_startup_done
 # nwg-displays: hyprlang twins of monitors.lua and workspaces.lua, per-machine profiles
 hypr-desktop/.config/hypr/monitors.conf
 hypr-desktop/.config/hypr/monitors.conf.bak
+hypr-desktop/.config/hypr/monitors.lua.bak
 hypr-desktop/.config/hypr/workspaces.conf
 hypr-desktop/.config/nwg-displays/active_profile.json
 hypr-desktop/.config/nwg-displays/profiles/

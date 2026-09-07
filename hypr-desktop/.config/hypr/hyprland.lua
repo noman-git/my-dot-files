@@ -23,5 +23,11 @@ require("lua/laptop")        -- laptop keys and touchpad
 require("lua/windowrules")   -- window and layer rules
 require("lua/startup")       -- autostart
 
+-- Catch-all for connectors not listed in monitors.lua (a new laptop's panel,
+-- an unknown external display). nwg-displays rewrites monitors.lua from
+-- scratch on every save, so the rule lives here. Named rules in monitors.lua
+-- win over this one.
+hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
+
 require("monitors")          -- written by nwg-displays
 require("workspaces")        -- written by nwg-displays

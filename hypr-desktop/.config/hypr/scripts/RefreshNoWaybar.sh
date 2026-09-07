@@ -29,7 +29,7 @@ done
 #ags -q && ags &
 
 # quit quickshell & relaunch quickshell
-pkill qs && qs &
+pkill qs; qs -c overview &
 
 # Wallust refresh (synchronous to ensure colors are ready)
 ${SCRIPTSDIR}/WallustSwww.sh

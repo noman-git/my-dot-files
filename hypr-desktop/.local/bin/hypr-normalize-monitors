@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
-"""Normalize ~/.config/hypr/monitors.conf after nwg-displays writes it.
+"""Normalize ~/.config/hypr/monitors.lua after nwg-displays writes it.
 
 nwg-displays saves monitors at raw canvas coordinates (e.g. 7680x2224),
 which hung Hyprland at startup on this machine once the NVIDIA GPU came
 back (phantom eDP-2 connector + far-from-origin layout, 2026-07-04).
 
-This script:
-  1. shifts all explicit monitor positions so the layout is anchored at 0x0
-     (relative arrangement is preserved exactly),
-  2. ensures a catch-all `monitor=,preferred,auto,1` rule exists so unknown
-     connectors always get a sane default,
-  3. backs up the previous file to monitors.conf.bak and live-reloads
-     Hyprland if it is running.
+This script shifts every explicit position so the layout is anchored at
+0x0 (the relative arrangement is preserved exactly), backs up the previous
+file to monitors.lua.bak and live-reloads Hyprland if it is running.
 
-Run it after using nwg-displays:  hypr-normalize-monitors
+The catch-all rule for unknown connectors lives in hyprland.lua, because
+nwg-displays rewrites monitors.lua from scratch on every save.
+
+Run it after using nwg-displays:  hypr-normalize-monitors [path]
 """
 
 import os
@@ -22,67 +21,51 @@ import shutil
 import subprocess
 import sys
 
-CONF = os.path.expanduser("~/.config/hypr/monitors.conf")
-CATCH_ALL = "monitor=,preferred,auto,1"
-POS_RE = re.compile(r"^(-?\d+)x(-?\d+)$")
+DEFAULT = os.path.expanduser("~/.config/hypr/monitors.lua")
+OUTPUT_RE = re.compile(r'^\s*output\s*=\s*"([^"]*)"')
+POS_RE = re.compile(r'^(\s*position\s*=\s*")(-?\d+)x(-?\d+)(".*)$')
 
 
 def main():
+    conf = sys.argv[1] if len(sys.argv) > 1 else DEFAULT
     try:
-        with open(CONF) as f:
+        with open(conf) as f:
             lines = f.read().splitlines()
     except FileNotFoundError:
-        sys.exit(f"{CONF} not found")
+        sys.exit(f"{conf} not found")
 
-    # Collect explicit positions from monitor rules (skip catch-all/disable/auto)
-    entries = []  # (line_index, fields, x, y)
-    have_catch_all = False
-    first_rule_idx = None
+    # Each hl.monitor({...}) block lists output before position. Skip blocks
+    # with an empty output (catch-all) and positions that are not "XxY".
+    entries = []  # (line_index, regex match, output name, x, y)
+    output = None
     for i, line in enumerate(lines):
-        stripped = line.strip()
-        if not stripped.startswith("monitor"):
+        m = OUTPUT_RE.match(line)
+        if m:
+            output = m.group(1)
             continue
-        key, _, value = stripped.partition("=")
-        if key.strip() != "monitor":
-            continue
-        if first_rule_idx is None:
-            first_rule_idx = i
-        fields = [f.strip() for f in value.split(",")]
-        if fields[0] == "":
-            have_catch_all = True
-            continue
-        if len(fields) >= 3:
-            m = POS_RE.match(fields[2])
-            if m:
-                entries.append((i, fields, int(m.group(1)), int(m.group(2))))
+        m = POS_RE.match(line)
+        if m and output:
+            entries.append((i, m, output, int(m.group(2)), int(m.group(3))))
 
-    changed = False
-    if entries:
-        min_x = min(e[2] for e in entries)
-        min_y = min(e[3] for e in entries)
-        if (min_x, min_y) != (0, 0):
-            for i, fields, x, y in entries:
-                fields[2] = f"{x - min_x}x{y - min_y}"
-                lines[i] = "monitor=" + ",".join(fields)
-                print(f"  {fields[0]}: {x}x{y} -> {fields[2]}")
-            changed = True
-
-    if not have_catch_all:
-        insert_at = first_rule_idx if first_rule_idx is not None else len(lines)
-        lines.insert(insert_at, CATCH_ALL)
-        print(f"  added catch-all rule: {CATCH_ALL}")
-        changed = True
-
-    if not changed:
-        print("monitors.conf already normalized, nothing to do")
+    if not entries:
+        print("no explicit positions in monitors.lua, nothing to do")
+        return
+    min_x = min(e[3] for e in entries)
+    min_y = min(e[4] for e in entries)
+    if (min_x, min_y) == (0, 0):
+        print("monitors.lua already anchored at 0x0, nothing to do")
         return
 
-    shutil.copy2(CONF, CONF + ".bak")
-    with open(CONF, "w") as f:
-        f.write("\n".join(lines) + "\n")
-    print(f"normalized {CONF} (backup: monitors.conf.bak)")
+    for i, m, name, x, y in entries:
+        lines[i] = f"{m.group(1)}{x - min_x}x{y - min_y}{m.group(4)}"
+        print(f"  {name}: {x}x{y} -> {x - min_x}x{y - min_y}")
 
-    if os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"):
+    shutil.copy2(conf, conf + ".bak")
+    with open(conf, "w") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"normalized {conf} (backup: {os.path.basename(conf)}.bak)")
+
+    if conf == DEFAULT and os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"):
         subprocess.run(["hyprctl", "reload"], check=False)
 
 
