@@ -39,3 +39,4 @@ hypr-desktop/.config/systemd/user/pipewire-session-manager.service
 # editor noise
 *.swp
 *~
+__pycache__/
