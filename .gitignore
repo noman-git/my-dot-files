@@ -22,7 +22,10 @@ hypr-desktop/.config/waybar/style.css
 # one-shot marker written by initial-boot.sh
 hypr-desktop/.config/hypr/.initial_startup_done
 
-# nwg-displays: hyprlang twins of monitors.lua and workspaces.lua, per-machine profiles
+# nwg-displays output: the monitor layout of the desk this machine sits at.
+# *.example copies are tracked; hyprland.lua loads these with pcall.
+hypr-desktop/.config/hypr/monitors.lua
+hypr-desktop/.config/hypr/workspaces.lua
 hypr-desktop/.config/hypr/monitors.conf
 hypr-desktop/.config/hypr/monitors.conf.bak
 hypr-desktop/.config/hypr/monitors.lua.bak

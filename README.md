@@ -48,11 +48,12 @@ setup_shell.sh        chsh to zsh
    had extracted them into `~/.icons` and `~/.themes` instead (664 MB, not in
    git); both locations work.
 6. Reboot and pick Hyprland in SDDM.
-7. Run `nwg-displays`, save, then `hypr-normalize-monitors`. The committed
-   `monitors.lua` and `workspaces.lua` describe this laptop (eDP-1
-   1920x1080@165 to the right of an HDMI-A-1 2560x1440); unknown connectors
-   get preferred mode at an automatic position from the catch-all rule in
-   `hyprland.lua` until then.
+7. Run `nwg-displays`, save, then `hypr-normalize-monitors`. `monitors.lua`
+   and `workspaces.lua` are not in git because nwg-displays rewrites them for
+   whatever desk the laptop sits at; `monitors.lua.example` and
+   `workspaces.lua.example` show the shape. Until you run nwg-displays, every
+   connector gets preferred mode at an automatic position from the catch-all
+   rule in `hyprland.lua`, and workspaces are not pinned to monitors.
 8. Copy wallpapers into `~/Pictures/wallpapers/Dynamic-Wallpapers/{Dark,Light}`
    and pick one with `SUPER+W`. Wallpapers are not in git.
 9. `hyprctl devices -j | jq '.mice[].name'` and update the touchpad name in
@@ -122,7 +123,7 @@ Stow links whole directories, so programs write into the repo working tree.
 | `*/wallust/colors-*`, `cava/config`, `quickshell/qml_color.json`, `kitty-themes/01-Wallust.conf`, `hypr/wallust/wallust-hyprland.conf` | wallust, on every wallpaper change |
 | `hypr/wallpaper_effects/*`, `rofi/.current_wallpaper` | WallustSwww.sh, WallpaperEffects.sh |
 | `waybar/config`, `waybar/style.css` (symlinks) | WaybarLayout.sh, WaybarStyles.sh, DarkLight.sh |
-| `hypr/monitors.conf`, `hypr/workspaces.conf`, `nwg-displays/profiles/`, `active_profile.json` | nwg-displays |
+| `hypr/monitors.lua`, `hypr/workspaces.lua` (plus the `.conf` twins), `nwg-displays/profiles/`, `active_profile.json` | nwg-displays, on every save |
 | `hypr/.initial_startup_done`                | initial-boot.sh, once                   |
 | `gtk-3.0/*` except `gtk.css`, `systemd/user/*.wants/` | nwg-look, systemctl --user enable |
 
@@ -131,7 +132,9 @@ state: `wallust/wallust.toml`, `swaync/style.css`, `qt5ct/qt5ct.conf`,
 `qt6ct/qt6ct.conf`, `wallust/templates/colors-rofi.rasi`, `rofi/config.rasi`
 (one `@theme` line, replaced by RofiThemeSelector.sh), `kitty/kitty.conf`.
 After a Dark/Light toggle or a theme pick, `git status` shows them modified;
-commit or `git checkout` them.
+commit or `git checkout` them. The monitor layout is deliberately not one of
+these: `hyprland.lua` loads `monitors.lua` and `workspaces.lua` with `pcall`,
+so the config is valid with or without them.
 
 Outside the repo: `~/.cache/.theme_mode` (Dark or Light),
 `~/.cache/.wallpaper_shuffle_mode` (Dark, Light, All or off),

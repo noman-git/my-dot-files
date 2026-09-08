@@ -29,5 +29,9 @@ require("lua/startup")       -- autostart
 -- win over this one.
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
 
-require("monitors")          -- written by nwg-displays
-require("workspaces")        -- written by nwg-displays
+-- monitors.lua and workspaces.lua are written by nwg-displays and describe the
+-- desk this machine sits at, so they are not in git (monitors.lua.example and
+-- workspaces.lua.example show the shape). A fresh machine has neither until
+-- nwg-displays is run once; the catch-all above covers it until then.
+pcall(require, "monitors")
+pcall(require, "workspaces")
