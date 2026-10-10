@@ -290,7 +290,11 @@ only draw a flat tint, an edge and a blur, so `glassbar`
 (`helpers/glassbar/main.swift`, built by `install_mac.sh` into
 `~/.local/bin`) draws Apple's real Liquid Glass (`NSGlassEffectView`, macOS
 26 and later) in borderless windows at level -21, just below SketchyBar's
-windows (-20). Each capsule is a transparent SketchyBar bracket; glassbar
+windows (-20). The style is clear glass, a 20% dark tint and
+`effectIsInteractive` (demo variant 6). Liquid Glass draws its highlights
+only while its window looks active, and glassbar is never the active app,
+so its windows (`ActiveLookPanel`) always report the active look; they
+still refuse keyboard focus. Each capsule is a transparent SketchyBar bracket; glassbar
 reads its place with `sketchybar --query` once a second, and at once when
 `plugins/workspaces.sh` or a bar reload sends it SIGUSR1. launchd runs it
 (`mac-desktop/Library/LaunchAgents/com.noman.glassbar.plist`, stowed into
