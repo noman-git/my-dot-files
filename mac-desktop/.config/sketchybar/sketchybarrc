@@ -80,10 +80,7 @@ sketchybar --add item bluetooth right \
   --set bluetooth update_freq=30 script="$PLUGIN_DIR/bluetooth.sh" \
   --subscribe bluetooth system_woke mouse.clicked mouse.exited.global \
   --add item bt.toggle popup.bluetooth \
-  --set bt.toggle icon=󰂯 click_script="$PLUGIN_DIR/bluetooth.sh toggle" \
-  --add item bt.settings popup.bluetooth \
-  --set bt.settings icon=󰒓 label="Bluetooth Settings" \
-    click_script="open '$SETTINGS.BluetoothSettings'; sketchybar --set bluetooth popup.drawing=off"
+  --set bt.toggle icon=󰂯 click_script="$PLUGIN_DIR/bluetooth.sh toggle"
 
 sketchybar --add item wifi right \
   --set wifi update_freq=30 label.drawing=off script="$PLUGIN_DIR/wifi.sh" \

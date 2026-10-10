@@ -26,17 +26,22 @@ update() {
 
 devices() {
   sketchybar --remove '/bt\.dev\..*/' >/dev/null 2>&1
-  [ "$(blueutil --power)" = "1" ] || return
   local i=0 addr name connected icon
-  while IFS=$'\t' read -r addr connected name; do
-    i=$((i + 1))
-    if [ "$connected" = "true" ]; then icon=󰂱; else icon=󰂯; fi
-    sketchybar --add item "bt.dev.$i" popup.$PARENT \
-      --set "bt.dev.$i" icon="$icon" label="$name" \
-        click_script="$PLUGIN_DIR/bluetooth.sh device $addr"
-  done < <(blueutil --paired --format json 2>/dev/null |
-    jq -r '.[] | [.address, (.connected | tostring), .name] | @tsv')
-  [ "$i" -gt 0 ] && sketchybar --move bt.settings after "bt.dev.$i"
+  if [ "$(blueutil --power)" = "1" ]; then
+    while IFS=$'\t' read -r addr connected name; do
+      i=$((i + 1))
+      if [ "$connected" = "true" ]; then icon=󰂱; else icon=󰂯; fi
+      sketchybar --add item "bt.dev.$i" popup.$PARENT \
+        --set "bt.dev.$i" icon="$icon" label="$name" \
+          click_script="$PLUGIN_DIR/bluetooth.sh device $addr"
+    done < <(blueutil --paired --format json 2>/dev/null |
+      jq -r '.[] | [.address, (.connected | tostring), .name] | @tsv')
+  fi
+  # --move does not reorder popup items, so add the settings entry last.
+  sketchybar --remove bt.settings >/dev/null 2>&1
+  sketchybar --add item bt.settings popup.$PARENT \
+    --set bt.settings icon=󰒓 label="Bluetooth Settings" \
+      click_script="open 'x-apple.systempreferences:com.apple.BluetoothSettings'; sketchybar --set $PARENT popup.drawing=off"
 }
 
 case "${1:-$SENDER}" in
