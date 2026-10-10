@@ -3,6 +3,22 @@ set -euo pipefail
 
 PYTHON_VERSION="3.12.2"
 VENV_DIR="$HOME/.virtualenvs/neovim"
+OS="$(uname -s)"
+
+# Install packages with pacman on Arch and Homebrew on macOS.
+# Usage: pkgs <pacman names...> -- <brew names...>
+pkgs() {
+  local arch=() mac=() seen=0 p
+  for p in "$@"; do
+    if [[ "$p" == "--" ]]; then seen=1; continue; fi
+    if [[ "$seen" == 0 ]]; then arch+=("$p"); else mac+=("$p"); fi
+  done
+  if [[ "$OS" == "Darwin" ]]; then
+    [[ ${#mac[@]} -gt 0 ]] && brew install "${mac[@]}"
+  else
+    sudo pacman -S --needed --noconfirm "${arch[@]}"
+  fi
+}
 
 echo "==> Starting environment setup..."
 
@@ -12,13 +28,9 @@ echo "==> Starting environment setup..."
 setup_pyenv_and_python() {
   echo "==> Installing pyenv..."
 
-  sudo pacman -S --needed --noconfirm \
-    pyenv \
-    base-devel \
-    openssl \
-    zlib \
-    xz \
-    tk
+  # Build dependencies for pyenv install. On macOS the compiler comes from
+  # the Xcode command line tools.
+  pkgs pyenv base-devel openssl zlib xz tk -- pyenv openssl readline sqlite3 xz zlib tcl-tk
 
   export PYENV_ROOT="$HOME/.pyenv"
   export PATH="$PYENV_ROOT/bin:$PATH"
@@ -64,6 +76,13 @@ setup_pyenv_and_python() {
 setup_lua() {
   echo "==> Installing Lua 5.4..."
 
+  if [[ "$OS" == "Darwin" ]]; then
+    # lua@5.4 is keg-only; Homebrew's plain lua is a newer version.
+    brew install lua@5.4
+    "$(brew --prefix lua@5.4)/bin/lua" -v
+    return
+  fi
+
   if ! command -v yay &>/dev/null; then
     echo "==> Installing yay..."
     sudo pacman -S --needed --noconfirm git base-devel
@@ -84,7 +103,7 @@ setup_lua() {
 # -------------------------------
 setup_node() {
   echo "==> Installing Node.js..."
-  sudo pacman -S --needed --noconfirm nodejs npm
+  pkgs nodejs npm -- node
 }
 
 # -------------------------------
