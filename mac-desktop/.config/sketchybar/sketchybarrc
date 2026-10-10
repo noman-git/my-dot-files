@@ -37,8 +37,9 @@ sketchybar --add item cava left \
 sketchybar --add event omniwm_change
 
 # Workspace number, then the app icons (sketchybar-app-font) in the label.
-# The number has 8 points on both sides, so the white pill of an empty
-# active workspace is symmetric; the icons start right after that.
+# The number sits centred in a fixed 26-point box, so every active pill has
+# the same width and the digit is in the middle (padding around the glyph
+# left the 4 off centre: its glyph rounded to a different width).
 # Both sides of the notch fill outward from it, so 1-5 are added in reverse
 # to read 1 2 3 4 5 | notch | 6 7 8 9.
 for i in 5 4 3 2 1 6 7 8 9; do
@@ -46,7 +47,7 @@ for i in 5 4 3 2 1 6 7 8 9; do
   if [ "$i" -le 5 ]; then pos=q; else pos=e; fi
   sketchybar --add item "ws.$i" "$pos" \
     --set "ws.$i" icon="$i" icon.color="$MUTED_COLOR" \
-      icon.padding_left=8 icon.padding_right=8 \
+      icon.padding_left=0 icon.padding_right=0 icon.width=26 icon.align=center \
       label.font="sketchybar-app-font:Regular:14.0" label.drawing=off \
       label.padding_left=0 label.padding_right=8 label.y_offset=-1 \
       background.color="$ACTIVE_COLOR" background.corner_radius=11 \
