@@ -51,7 +51,7 @@ size = 4.0
 bottom = 4.0
 left = 4.0
 right = 4.0
-top = 4.0
+top = 37.0
 
 [general]
 animationSpeed = 1.0
@@ -170,7 +170,7 @@ autoHideHideDelayMilliseconds = 0.0
 autoHideRevealDelayMilliseconds = 0.0
 backgroundOpacity = 0.1
 deduplicateAppIcons = false
-enabled = true
+enabled = false
 excludedBundleIDs = []
 height = 24.0
 hideEmptyWorkspaces = false

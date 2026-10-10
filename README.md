@@ -28,7 +28,9 @@ seed/wallpaper.jpg    first wallpaper, so wallust has colours before you pick on
 install_arch.sh       full setup; calls install_system.sh at the end
 install_system.sh     /etc, /boot, SDDM theme, groups, services (sudo, idempotent)
 mac-desktop/          stow package for the macOS desktop:
-                        ~/.config/{omniwm/settings.toml,hammerspoon/init.lua}
+                        ~/.config/{omniwm/settings.toml,hammerspoon/init.lua,
+                                   sketchybar,wallust,karabiner}
+                        ~/.local/bin/mac-wallpaper
 pkgs/Brewfile         macOS packages for brew bundle
 install_mac.sh        full macOS setup
 install_ubuntu.sh     shell-only setup for Ubuntu machines
@@ -162,7 +164,8 @@ Tested on an M4 Pro with macOS 27.0.1 (2026-10-10).
    the `defaults write` settings (Dock autohide, key repeat, no Spaces
    reordering, no drag-to-edge tiling).
 5. Give OmniWM Accessibility and Input Monitoring, and Hammerspoon
-   Accessibility, in System Settings > Privacy & Security. OmniWM does not
+   Accessibility, in System Settings > Privacy & Security. Allow the
+   Karabiner driver extension and Input Monitoring when Karabiner asks. OmniWM does not
    need Screen Recording; without it, Overview and workspace swipes show no
    window thumbnails.
 6. In Raycast, set the hotkey to `Cmd+Space` and turn off the Spotlight
@@ -177,7 +180,9 @@ What replaces what:
 | exec binds                | Hammerspoon (`mac-desktop/.config/hammerspoon`)    |
 | rofi                      | Raycast                                            |
 | cliphist                  | Spotlight clipboard (`Cmd+4`)                      |
-| waybar                    | OmniWM workspace bar over the menu bar             |
+| waybar                    | SketchyBar; the macOS menu bar is hidden           |
+| wallust + swww            | `mac-wallpaper <image>` (desktoppr, then wallust)  |
+| xremap                    | Karabiner: Caps Lock tap is Escape, hold is Hyper  |
 | SUPER+SHIFT+Return drop-down | OmniWM Quake terminal (Ghostty)                 |
 | grim, slurp, swappy       | `Cmd+Shift+5` toolbar                              |
 | hyprlock, hyprsunset      | lock screen, Night Shift                           |
@@ -211,8 +216,31 @@ shortcuts. Window binds are in OmniWM; app binds are in Hammerspoon.
 | `Option+Shift+S`              | screenshot toolbar                     |
 | `Control+Option+L`            | lock screen                            |
 | `Control+Option+Space`        | OmniWM command palette                 |
+| `Caps Lock` (tap)             | Escape                                 |
+| `Hyper+T/B/C/S/D/M/F`         | kitty, Zen, Chrome, Slack, DBeaver, MongoDB Compass, Finder |
 
 Every other OmniWM bind is listed in `settings.toml` under `[[hotkeys]]`.
+
+Hyper is `Caps Lock` held (Karabiner sends Ctrl+Option+Shift+Cmd). A Hyper
+bind focuses the app, or opens it if it is not running. The list is `apps` in
+`hammerspoon/init.lua`.
+
+### Bar and colours
+
+SketchyBar shows the OmniWM workspaces that have windows or focus, the front
+app, volume, battery and the clock. `sketchybarrc` starts one
+`omniwmctl watch` process that sends `omniwm_change` to the bar; this needs
+`ipcEnabled = true` in the OmniWM settings. OmniWM's own workspace bar is off,
+and `gaps.outer.top = 37` keeps windows 4 points under the 33-point bar.
+
+`mac-wallpaper <image>` sets the wallpaper on every display and runs
+`wallust run -d ~/.config/wallust`. wallust on macOS reads
+`~/Library/Application Support` by default, hence `-d`. It writes
+`~/.config/sketchybar/wallust-colors.sh` and
+`~/.config/kitty/kitty-themes/01-Wallust.conf` (not in git), then reloads
+kitty and SketchyBar. `mac-wallpaper` with no image recolours from the last
+image. The image path is in `~/.cache/.current_wallpaper`. The OmniWM border
+colour is fixed in `settings.toml`; wallust does not change it.
 
 ### Editing the OmniWM config
 

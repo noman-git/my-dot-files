@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# SketchyBar: the waybar of the macOS desktop. Workspaces come from OmniWM
+# through `omniwmctl watch`, colours from wallust (see colors.sh).
+
+CONFIG_DIR="$HOME/.config/sketchybar"
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+source "$CONFIG_DIR/colors.sh"
+
+FONT="JetBrainsMono Nerd Font"
+
+sketchybar --bar position=top height=33 blur_radius=20 color="$BAR_COLOR" \
+  topmost=off sticky=on padding_left=8 padding_right=8 notch_width=200
+
+sketchybar --default updates=when_shown \
+  icon.font="$FONT:Bold:14.0" icon.color="$ICON_COLOR" \
+  label.font="$FONT:Bold:13.0" label.color="$LABEL_COLOR" \
+  padding_left=4 padding_right=4 \
+  icon.padding_left=6 icon.padding_right=4 \
+  label.padding_left=4 label.padding_right=6
+
+sketchybar --add event omniwm_change
+
+for i in 1 2 3 4 5 6 7 8 9; do
+  sketchybar --add item "ws.$i" left \
+    --set "ws.$i" icon="$i" label.drawing=off drawing=off \
+      background.color="$ACCENT_COLOR" background.corner_radius=6 \
+      background.height=22 background.drawing=off \
+      click_script="omniwmctl command switch-workspace $i"
+done
+
+sketchybar --add item workspaces left \
+  --set workspaces drawing=off updates=on script="$PLUGIN_DIR/workspaces.sh" \
+  --subscribe workspaces omniwm_change system_woke
+
+sketchybar --add item front_app left \
+  --set front_app icon.drawing=off label.color="$ACCENT_COLOR" \
+    script="$PLUGIN_DIR/front_app.sh" \
+  --subscribe front_app front_app_switched
+
+sketchybar --add item clock right \
+  --set clock update_freq=10 icon=󰥔 script="$PLUGIN_DIR/clock.sh"
+
+sketchybar --add item battery right \
+  --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
+  --subscribe battery system_woke power_source_change
+
+sketchybar --add item volume right \
+  --set volume script="$PLUGIN_DIR/volume.sh" \
+  --subscribe volume volume_change
+
+# One watcher per bar start. --reconnect keeps it alive across OmniWM restarts.
+pkill -f "omniwmctl watch active-workspace" 2>/dev/null
+nohup omniwmctl watch active-workspace,windows-changed --reconnect \
+  --exec sketchybar --trigger omniwm_change >/dev/null 2>&1 &
+disown
+
+sketchybar --update

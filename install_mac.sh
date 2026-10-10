@@ -3,12 +3,14 @@
 #
 #   ./install_mac.sh [--no-brew] [--no-defaults]
 #
-# Order: Homebrew, packages from pkgs/Brewfile, submodules, stow, Hammerspoon
-# config path, macOS defaults, then start OmniWM and Hammerspoon. Re-runnable:
-# brew bundle skips installed packages and stow uses -R.
+# Order: Homebrew, packages from pkgs/Brewfile, wallust, submodules, stow,
+# macOS defaults, first wallust colours, then start the desktop apps.
+# Re-runnable: brew bundle skips installed packages, cargo skips an installed
+# wallust, and stow uses -R.
 #
 # After the first run, give OmniWM Accessibility and Input Monitoring in
-# System Settings > Privacy & Security, and give Hammerspoon Accessibility.
+# System Settings > Privacy & Security, give Hammerspoon Accessibility, and
+# allow the Karabiner driver extension when Karabiner asks.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd -P)"
@@ -43,13 +45,18 @@ install_brew() {
   fi
   log "installing packages from pkgs/Brewfile"
   brew bundle --file "$REPO/pkgs/Brewfile"
+  log "installing wallust"
+  command -v wallust >/dev/null 2>&1 || [ -x "$HOME/.cargo/bin/wallust" ] || cargo install wallust
 }
 
 stow_packages() {
   log "stowing ${STOW_PACKAGES[*]}"
   # Pre-create the dirs so stow links the files inside them and not the
   # whole dir. Programs then write their own state next to the links.
-  mkdir -p "$HOME/.config/omniwm" "$HOME/.config/hammerspoon" "$HOME/.config/kitty"
+  # ~/.config/karabiner is left out on purpose: Karabiner replaces
+  # karabiner.json on save, which breaks a file link, so stow links the dir.
+  mkdir -p "$HOME/.config/omniwm" "$HOME/.config/hammerspoon" "$HOME/.config/kitty" \
+    "$HOME/.config/sketchybar" "$HOME/.config/wallust" "$HOME/.local/bin"
   local p
   for p in "${STOW_PACKAGES[@]}"; do
     if ! stow -R -v "$p"; then
@@ -73,13 +80,23 @@ set_defaults() {
   # Turn off the drag-to-edge window tiling of macOS 15 and later; it fights OmniWM.
   defaults write com.apple.WindowManager EnableTilingByEdgeDrag -bool false
   defaults write com.apple.WindowManager EnableTopTilingByEdgeDrag -bool false
+  # Hide the menu bar; SketchyBar takes its place. Apps pick this up on relaunch.
+  defaults write NSGlobalDomain _HIHideMenuBar -bool true
   killall Dock 2>/dev/null || true
 }
 
+seed_colours() {
+  [ -f "$HOME/.cache/.current_wallpaper" ] && return
+  log "first wallust colours from seed/wallpaper.jpg"
+  "$HOME/.local/bin/mac-wallpaper" "$REPO/seed/wallpaper.jpg" || true
+}
+
 start_apps() {
-  log "starting OmniWM and Hammerspoon"
+  log "starting OmniWM, SketchyBar, Hammerspoon and Karabiner"
   open -a OmniWM || true
+  brew services start sketchybar || true
   open -a Hammerspoon || true
+  open -a Karabiner-Elements || true
 }
 
 main() {
@@ -88,6 +105,7 @@ main() {
   git submodule update --init --recursive
   stow_packages
   [ "$DO_DEFAULTS" = 1 ] && set_defaults
+  seed_colours
   start_apps
   log "done. Grant the permissions listed at the top of this script, then log out and in once."
 }

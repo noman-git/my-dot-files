@@ -43,3 +43,7 @@ hypr-desktop/.config/systemd/user/pipewire-session-manager.service
 *.swp
 *~
 __pycache__/
+
+# macOS: Karabiner keeps backups next to karabiner.json, and the stow link is
+# the whole ~/.config/karabiner dir (Karabiner replaces the file on save).
+mac-desktop/.config/karabiner/automatic_backups/

@@ -43,4 +43,19 @@ bind({ "ctrl", "alt" }, "l", "lock screen", hs.caffeinate.lockScreen)
 
 bind({ "alt", "ctrl", "shift" }, "r", "reload hammerspoon", hs.reload)
 
+-- Hyper (Caps Lock held, from Karabiner) + letter: focus the app, or open it.
+local hyper = { "ctrl", "alt", "shift", "cmd" }
+local apps = {
+    t = "net.kovidgoyal.kitty",
+    b = "app.zen-browser.zen",
+    c = "com.google.Chrome",
+    s = "com.tinyspeck.slackmacgap",
+    d = "org.jkiss.dbeaver.core.product",
+    m = "com.mongodb.compass",
+    f = "com.apple.finder",
+}
+for key, id in pairs(apps) do
+    bind(hyper, key, "focus " .. id, function() hs.application.launchOrFocusByBundleID(id) end)
+end
+
 hs.alert.show("Hammerspoon config loaded")

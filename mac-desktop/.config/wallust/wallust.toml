@@ -1,0 +1,15 @@
+# wallust config for macOS. mac-wallpaper runs `wallust run -d ~/.config/wallust`
+# because wallust on macOS reads ~/Library/Application Support by default.
+# Same palette settings as hypr-desktop/.config/wallust/wallust.toml.
+
+backend = "kmeans"
+color_space = "labmixed"
+palette = "dark16"
+threshold = 11
+
+[templates]
+kitty.template = 'colors-kitty.conf'
+kitty.target = '~/.config/kitty/kitty-themes/01-Wallust.conf'
+
+sketchybar.template = 'colors-sketchybar.sh'
+sketchybar.target = '~/.config/sketchybar/wallust-colors.sh'
