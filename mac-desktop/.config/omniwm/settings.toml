@@ -293,6 +293,11 @@ minHeight = 650.0
 minWidth = 930.0
 
 [[appRules]]
+bundleId = "com.apple.Stickies"
+id = "7B539034-D9A7-4886-9A9F-CA6CDF1FC614"
+layout = "float"
+
+[[appRules]]
 bundleId = "com.apple.MobileSMS"
 id = "552FB77D-BF0E-4737-90A6-B5BC6986C579"
 minHeight = 320.0

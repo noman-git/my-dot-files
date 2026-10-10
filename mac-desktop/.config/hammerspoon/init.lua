@@ -623,3 +623,18 @@ bind({ "alt", "shift" }, "m", "music", function()
     musicChooser:query("")
     musicChooser:show()
 end)
+
+-- Sticky notes, like sticky on Arch: Option+Cmd+N shows or hides Stickies,
+-- Option+Cmd+Shift+N makes a new note. OmniWM floats Stickies (app rule).
+local STICKIES = "com.apple.Stickies"
+bind({ "alt", "cmd" }, "n", "show or hide sticky notes", whenModifiersUp(function()
+    local app = hs.application.get(STICKIES)
+    if app and app:isFrontmost() then app:hide() else hs.application.launchOrFocusByBundleID(STICKIES) end
+end))
+bind({ "alt", "cmd", "shift" }, "n", "new sticky note", whenModifiersUp(function()
+    hs.application.launchOrFocusByBundleID(STICKIES)
+    hs.timer.waitUntil(function()
+        local app = hs.application.get(STICKIES)
+        return app and app:isFrontmost()
+    end, function() hs.eventtap.keyStroke({ "cmd" }, "n", 0) end, 0.05)
+end))
