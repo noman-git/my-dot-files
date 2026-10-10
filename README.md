@@ -309,7 +309,12 @@ volume, Bluetooth, Wi-Fi.
   add `/Applications/Hammerspoon.app` under **System Audio Recording Only**,
   then reload Hammerspoon. Without the permission cava stops at once and
   opens System Settings, so Hammerspoon does not restart it and shows a
-  message.
+  message. cava runs only while sound plays: macOS shows its purple privacy
+  dot at the top right for as long as anything records system audio.
+  Hammerspoon reads `pmset -g assertions` every 2 seconds; an output device
+  of coreaudiod holds a note while it plays. It starts cava then and stops
+  it after 5 seconds without one. The bar keeps 26 points of right padding
+  for the dot.
 
 - Wi-Fi, Bluetooth, volume and battery open a menu under the item. Menu
   entries are fixed slots that `sketchybarrc` makes and the scripts fill;

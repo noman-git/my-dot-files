@@ -858,23 +858,65 @@ local locationTimer = hs.timer.doEvery(3600, saveLocation)
 
 
 
--- Music bars in SketchyBar (plugins/cava_bar.sh). Hammerspoon runs it so the
--- Core Audio tap checks Hammerspoon's "System Audio Recording Only"
--- permission. If cava ends within 30 s it is almost always that permission
--- (cava then opens System Settings), so it is not restarted: allow
--- Hammerspoon there and reload Hammerspoon (Ctrl+Option+Shift+R).
+-- Music bars in SketchyBar (plugins/cava_bar.sh), only while sound plays.
+-- cava records system audio, and macOS shows its purple privacy dot for as
+-- long as that runs, so cava starts when sound plays and stops after 5 s of
+-- silence. "Sound plays" is read from the power notes of coreaudiod
+-- (`pmset -g assertions`): an output device holds one while it plays.
+-- cava's own tap and microphone inputs hold one too, so those are skipped.
+--
+-- Hammerspoon runs cava so the Core Audio tap checks Hammerspoon's "System
+-- Audio Recording Only" permission. If cava ends by itself within 30 s it is
+-- almost always that permission (cava then opens System Settings), so it is
+-- not started again until a Hammerspoon reload.
 local CAVA_BAR = os.getenv("HOME") .. "/.config/sketchybar/plugins/cava_bar.sh"
-local cavaTask
+local CAVA_SILENCE_SECONDS = 5
+local cavaTask, cavaStopping, cavaBlocked, silentSince = nil, false, false, nil
+
+local function soundPlaying()
+    local out = hs.execute("/usr/bin/pmset -g assertions") or ""
+    for line in out:gmatch("[^\n]+") do
+        if line:find("(coreaudiod)", 1, true) and line:find("preventuseridlesleep", 1, true)
+            and not line:find(".tap.", 1, true) and not line:find("Microphone", 1, true)
+            and not line:find("Input", 1, true) then
+            return true
+        end
+    end
+    return false
+end
+
 local function startCavaBar()
+    if cavaBlocked or (cavaTask and cavaTask:isRunning()) then return end
     local started = hs.timer.secondsSinceEpoch()
+    cavaStopping = false
     cavaTask = hs.task.new("/bin/bash", function()
-        if hs.timer.secondsSinceEpoch() - started > 30 then
-            hs.timer.doAfter(5, startCavaBar)
-        else
+        cavaTask = nil
+        if cavaStopping then return end
+        if hs.timer.secondsSinceEpoch() - started < 30 then
+            cavaBlocked = true
             hs.alert.show("Music bars: allow Hammerspoon under System Audio Recording Only, then reload Hammerspoon")
         end
     end, { CAVA_BAR })
     cavaTask:setEnvironment(CLEAN_ENV)
     cavaTask:start()
 end
-startCavaBar()
+
+local function stopCavaBar()
+    if not (cavaTask and cavaTask:isRunning()) then return end
+    cavaStopping = true
+    cavaTask:terminate()
+    -- cava is a child of the script; stop it too, or the tap (and the dot) stays.
+    hs.execute("/usr/bin/pkill -f 'cava -p " .. os.getenv("HOME") .. "/.config/sketchybar/cava_bar.conf'")
+    hs.task.new("/opt/homebrew/bin/sketchybar", nil, { "--set", "cava", "label=▁▁▁▁▁▁▁▁" }):start()
+end
+
+local cavaTimer = hs.timer.doEvery(2, function()
+    if soundPlaying() then
+        silentSince = nil
+        startCavaBar()
+    else
+        local now = hs.timer.secondsSinceEpoch()
+        silentSince = silentSince or now
+        if now - silentSince >= CAVA_SILENCE_SECONDS then stopCavaBar() end
+    end
+end)
