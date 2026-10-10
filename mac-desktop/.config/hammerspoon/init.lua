@@ -249,8 +249,15 @@ local function makeThumbs(files)
     thumbTask:start()
 end
 
+local setShuffle
 local wallpaperChooser = hs.chooser.new(function(choice)
-    if choice then setWallpaper(choice.path) end
+    if not choice then return end
+    if choice.shuffle ~= nil then
+        setShuffle(choice.shuffle)
+        hs.alert.show("Wallpaper shuffle " .. (choice.shuffle and "on (every 30 minutes)" or "off"))
+    else
+        setWallpaper(choice.path)
+    end
 end)
 wallpaperChooser:placeholderText("Wallpaper")
 wallpaperChooser:rows(8)
@@ -262,7 +269,12 @@ bind(mainMod, "w", "wallpaper picker", function()
         return
     end
     makeThumbs(files)
-    local choices = {}
+    local shuffling = hs.settings.get("wallpaperShuffle") == true
+    local choices = { {
+        text = shuffling and "Stop wallpaper shuffle" or "Shuffle wallpapers every 30 minutes",
+        subText = shuffling and "Shuffle is on" or "Shuffle is off",
+        shuffle = not shuffling,
+    } }
     for _, path in ipairs(files) do
         local thumb = thumbPath(path)
         table.insert(choices, {
@@ -284,6 +296,106 @@ bind({ "ctrl", "alt" }, "w", "random wallpaper", function()
     end
     setWallpaper(files[math.random(#files)])
 end)
+
+-- Wallpaper effects, like WallpaperEffects.sh (Option+Shift+W): ImageMagick
+-- applies an effect to the last wallpaper that mac-wallpaper set (path in
+-- ~/.cache/.current_wallpaper) and sets the result. "No Effects" sets the
+-- original again. The effect image is ~/.cache/wallpaper-effects/current.jpg.
+local MAGICK = "/opt/homebrew/bin/magick"
+local EFFECT_DIR = os.getenv("HOME") .. "/.cache/wallpaper-effects"
+local ORIGINAL_STATE = os.getenv("HOME") .. "/.cache/.wallpaper_original"
+local WALLPAPER_EFFECTS = {
+    { "No Effects", nil },
+    { "Black & White", { "-colorspace", "gray", "-sigmoidal-contrast", "10,40%" } },
+    { "Blurred", { "-blur", "0x10" } },
+    { "Charcoal", { "-charcoal", "0x5" } },
+    { "Edge Detect", { "-edge", "1" } },
+    { "Emboss", { "-emboss", "0x5" } },
+    { "Frame Raised", { "+raise", "150" } },
+    { "Frame Sunk", { "-raise", "150" } },
+    { "Negate", { "-negate" } },
+    { "Oil Paint", { "-paint", "4" } },
+    { "Posterize", { "-posterize", "4" } },
+    { "Polaroid", { "-polaroid", "0" } },
+    { "Sepia Tone", { "-sepia-tone", "65%" } },
+    { "Solarize", { "-solarize", "80%" } },
+    { "Sharpen", { "-sharpen", "0x5" } },
+    { "Vignette", { "-vignette", "0x3" } },
+    { "Vignette-black", { "-background", "black", "-vignette", "0x3" } },
+    { "Zoomed", { "-gravity", "Center", "-extent", "1:1" } },
+}
+
+local function readFile(path)
+    local f = io.open(path)
+    if not f then return nil end
+    local s = f:read("*l")
+    f:close()
+    return s
+end
+
+local function writeFile(path, s)
+    local f = io.open(path, "w")
+    if f then f:write(s, "\n"); f:close() end
+end
+
+-- The original of the current wallpaper: the effect output is never used as
+-- the input of the next effect.
+local function originalWallpaper()
+    local current = readFile(os.getenv("HOME") .. "/.cache/.current_wallpaper")
+    if current and not current:find(EFFECT_DIR, 1, true) then
+        writeFile(ORIGINAL_STATE, current)
+        return current
+    end
+    return readFile(ORIGINAL_STATE)
+end
+
+local effectChooser = hs.chooser.new(function(choice)
+    if not choice then return end
+    local original = originalWallpaper()
+    if not original then
+        hs.alert.show("Set a wallpaper first (Option+W)")
+        return
+    end
+    local effect = WALLPAPER_EFFECTS[choice.index][2]
+    if not effect then
+        setWallpaper(original)
+        return
+    end
+    hs.fs.mkdir(EFFECT_DIR)
+    -- A new file name each time: macOS does not reload a wallpaper whose path
+    -- did not change.
+    local out = string.format("%s/%s.jpg", EFFECT_DIR, os.time())
+    hs.execute("rm -f '" .. EFFECT_DIR .. "'/*.jpg")
+    local args = { original }
+    for _, a in ipairs(effect) do table.insert(args, a) end
+    table.insert(args, out)
+    hs.alert.show("Applying " .. choice.text .. "…")
+    hs.task.new(MAGICK, function(code, _, err)
+        if code == 0 then setWallpaper(out) else hs.alert.show("magick failed: " .. (err or "")) end
+    end, args):start()
+end)
+effectChooser:placeholderText("Wallpaper effect")
+local effectChoices = {}
+for i, e in ipairs(WALLPAPER_EFFECTS) do table.insert(effectChoices, { text = e[1], index = i }) end
+effectChooser:choices(effectChoices)
+bind({ "alt", "shift" }, "w", "wallpaper effects", function() effectChooser:show() end)
+
+-- Wallpaper shuffle, like WallpaperAutoChange.sh: a random wallpaper every
+-- 30 minutes. Switch it on and off from the wallpaper picker (Option+W); the
+-- state survives a Hammerspoon restart (hs.settings).
+local SHUFFLE_SECONDS = 1800
+local shuffleTimer
+function setShuffle(on)
+    if shuffleTimer then shuffleTimer:stop(); shuffleTimer = nil end
+    hs.settings.set("wallpaperShuffle", on)
+    if on then
+        shuffleTimer = hs.timer.doEvery(SHUFFLE_SECONDS, function()
+            local files = wallpapers()
+            if #files > 0 then setWallpaper(files[math.random(#files)]) end
+        end)
+    end
+end
+setShuffle(hs.settings.get("wallpaperShuffle") == true)
 
 -- Launcher tools on the Arch rofi keys (ALT on Arch is Command here).
 -- Raycast keeps its own hotkeys in an encrypted database, so the keys live
