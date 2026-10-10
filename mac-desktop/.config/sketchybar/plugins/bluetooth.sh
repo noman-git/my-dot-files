@@ -4,7 +4,7 @@
 # or disconnects it. Uses blueutil.
 #   bluetooth.sh toggle            turn Bluetooth on or off
 #   bluetooth.sh device <address>  connect or disconnect one device
-#   bluetooth.sh scan              search 8 seconds for new devices
+#   bluetooth.sh scan              search 6 seconds for new devices
 #   bluetooth.sh pair <address>    pair and connect a new device
 
 PARENT=bluetooth
@@ -53,9 +53,9 @@ devices() {
 }
 
 scan() {
-  sketchybar --set bt.scan label="Searching…" icon=󰂰
+  sketchybar --set bt.scan label="Searching for 6 seconds…" icon=󰂰
   local found i=0 addr name
-  found="$(blueutil --inquiry 8 --format json 2>/dev/null)"
+  found="$(blueutil --inquiry 6 --format json 2>/dev/null)"
   sketchybar --remove '/bt\.new\..*/' >/dev/null 2>&1
   while IFS=$'\t' read -r addr name; do
     i=$((i + 1))
@@ -64,7 +64,7 @@ scan() {
         click_script="$PLUGIN_DIR/bluetooth.sh pair $addr"
   done < <(echo "$found" | jq -r '.[] | select(.paired | not) | [.address, (.name // "")] | @tsv')
   if [ "$i" -eq 0 ]; then
-    sketchybar --set bt.scan label="No new devices. Search again"
+    sketchybar --set bt.scan label="No device in pairing mode. Search again"
   else
     sketchybar --set bt.scan label="Search again"
   fi
