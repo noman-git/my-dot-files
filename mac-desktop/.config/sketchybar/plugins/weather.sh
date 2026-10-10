@@ -12,8 +12,14 @@ case "$SENDER" in
 esac
 
 place="$(cat "$HOME/.cache/location" 2>/dev/null)"
-json="$(curl -fsS -m 15 "https://wttr.in/${place}?format=j1" 2>/dev/null)" || exit 0
-[ -n "$json" ] || exit 0
+# On a failed request try again in 1 minute (wttr.in is sometimes slow);
+# after a good one, every 15 minutes.
+json="$(curl -fsS -m 15 "https://wttr.in/${place}?format=j1" 2>/dev/null)"
+if [ -z "$json" ] || ! echo "$json" | jq -e '.current_condition[0]' >/dev/null 2>&1; then
+  sketchybar --set $PARENT update_freq=60
+  exit 0
+fi
+sketchybar --set $PARENT update_freq=900
 
 # wttr.in weather codes to Nerd Font icons (day icons).
 icon_for() {

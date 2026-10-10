@@ -18,6 +18,9 @@ let brackets = Array(CommandLine.arguments.dropFirst())
 let glassLevel = NSWindow.Level(rawValue: -21)
 // Height of the glass pill inside the 32-point bar (background.height).
 let pillHeight: CGFloat = 28
+// Dark tint, like the macOS Control Center tiles; without it the glass is
+// clear and reads as a light veil over the wallpaper.
+let glassTint = NSColor(white: 0, alpha: 0.35)
 
 var panels: [String: NSPanel] = [:]
 
@@ -53,7 +56,9 @@ func makePanel() -> NSPanel {
     panel.hasShadow = false
     panel.ignoresMouseEvents = true
     panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
-    panel.contentView = NSGlassEffectView()
+    let glass = NSGlassEffectView()
+    glass.tintColor = glassTint
+    panel.contentView = glass
     return panel
 }
 

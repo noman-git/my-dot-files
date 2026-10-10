@@ -93,6 +93,9 @@ set_defaults() {
 build_glassbar() {
   log "building glassbar (real Liquid Glass behind the SketchyBar capsules)"
   mkdir -p "$HOME/.local/bin"
+  # Remove first: macOS can kill a signed binary that was overwritten in
+  # place (it caches the old signature).
+  rm -f "$HOME/.local/bin/glassbar"
   swiftc -O "$REPO/mac-desktop/.config/sketchybar/helpers/glassbar/main.swift" \
     -o "$HOME/.local/bin/glassbar" || log "glassbar did not build; the bar works without glass"
 }
