@@ -32,6 +32,7 @@ mac-desktop/          stow package for the macOS desktop:
                         ~/.config/{omniwm/settings.toml,hammerspoon/init.lua,
                                    sketchybar,wallust,karabiner}
                         ~/.local/bin/mac-wallpaper
+                        ~/Library/LaunchAgents/com.noman.glassbar.plist
 pkgs/Brewfile         macOS packages for brew bundle
 install_mac.sh        full macOS setup
 install_ubuntu.sh     shell-only setup for Ubuntu machines
@@ -291,8 +292,12 @@ only draw a flat tint, an edge and a blur, so `glassbar`
 26 and later) in borderless windows at level -21, just below SketchyBar's
 windows (-20). Each capsule is a transparent SketchyBar bracket; glassbar
 reads its place with `sketchybar --query` once a second, and at once when
-`plugins/workspaces.sh` sends it SIGUSR1. `sketchybarrc` starts it (log in
-`~/.cache/glassbar.log`), and OmniWM does not manage its windows. An empty
+`plugins/workspaces.sh` or a bar reload sends it SIGUSR1. launchd runs it
+(`mac-desktop/Library/LaunchAgents/com.noman.glassbar.plist`, stowed into
+`~/Library/LaunchAgents`, errors in `/tmp/glassbar.err`) and restarts it if
+it stops; starting it from `sketchybarrc` failed now and then on a reload.
+OmniWM does not manage its windows. `glassbar --demo` opens a window with
+six glass variants over coloured stripes, to compare styles. An empty
 `spacer.time` item keeps the two right capsules apart, because a capsule
 covers its items' padding. The active workspace is a white pill with dark
 text, like an active Control Center toggle. The colours in `colors.sh` are

@@ -90,6 +90,58 @@ func refresh() {
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
 
+// `glassbar --demo`: a window with coloured stripes behind six glass pills,
+// one per style, tint and interactive setting, to compare with Control
+// Center. It closes after 60 seconds.
+if CommandLine.arguments.dropFirst().first == "--demo" {
+    let size = NSSize(width: 760, height: 420)
+    let screen = NSScreen.main?.frame ?? .zero
+    let window = NSWindow(contentRect: NSRect(x: screen.midX - size.width / 2, y: screen.midY - size.height / 2,
+                                              width: size.width, height: size.height),
+                          styleMask: [.titled, .closable], backing: .buffered, defer: false)
+    window.title = "glassbar demo"
+    window.level = .floating
+    let root = NSView(frame: NSRect(origin: .zero, size: size))
+    let stripes: [NSColor] = [.systemRed, .systemGreen, .black, .systemGreen, .systemBlue, .black, .systemPink]
+    for (i, colour) in stripes.enumerated() {
+        let stripe = NSView(frame: NSRect(x: 0, y: CGFloat(i) * size.height / CGFloat(stripes.count),
+                                          width: size.width * 0.75, height: size.height / CGFloat(stripes.count)))
+        stripe.wantsLayer = true
+        stripe.layer?.backgroundColor = colour.withAlphaComponent(0.8).cgColor
+        root.addSubview(stripe)
+    }
+    let variants: [(String, NSGlassEffectView.Style, CGFloat, Bool)] = [
+        ("1 regular", .regular, 0, false),
+        ("2 regular tint .35", .regular, 0.35, false),
+        ("3 clear", .clear, 0, false),
+        ("4 clear tint .35", .clear, 0.35, false),
+        ("5 regular interactive", .regular, 0, true),
+        ("6 clear interactive", .clear, 0.2, true),
+    ]
+    for (i, v) in variants.enumerated() {
+        let col = CGFloat(i % 2), row = CGFloat(i / 2)
+        let glass = NSGlassEffectView(frame: NSRect(x: 40 + col * 360, y: size.height - 110 - row * 130,
+                                                    width: 320, height: 64))
+        glass.style = v.1
+        glass.cornerRadius = 32
+        if v.2 > 0 { glass.tintColor = NSColor(white: 0, alpha: v.2) }
+        if v.3 { glass.effectIsInteractive = true }
+        let label = NSTextField(labelWithString: v.0)
+        label.font = .systemFont(ofSize: 17, weight: .semibold)
+        label.textColor = .white
+        label.frame = NSRect(x: 24, y: 20, width: 280, height: 24)
+        let content = NSView(frame: glass.bounds)
+        content.addSubview(label)
+        glass.contentView = content
+        root.addSubview(glass)
+    }
+    window.contentView = root
+    window.makeKeyAndOrderFront(nil)
+    app.activate(ignoringOtherApps: true)
+    DispatchQueue.main.asyncAfter(deadline: .now() + 60) { exit(0) }
+    app.run()
+}
+
 signal(SIGUSR1, SIG_IGN)
 let usr1 = DispatchSource.makeSignalSource(signal: SIGUSR1, queue: .main)
 usr1.setEventHandler { refresh() }

@@ -152,10 +152,9 @@ sketchybar --add item wifi.settings popup.wifi \
 
 # Glass capsules, like the Control Center tiles. Each bracket marks one
 # group; glassbar (helpers/glassbar, built by install_mac.sh into
-# ~/.local/bin) draws real macOS glass (NSGlassEffectView) behind each
-# bracket. SketchyBar alone draws only a flat tint, so the brackets stay
+# ~/.local/bin, run by launchd) draws real macOS glass (NSGlassEffectView)
+# behind each bracket. SketchyBar alone draws only a flat tint, so the brackets stay
 # transparent; they need a background.height to have a size.
-GLASS_BRACKETS=(glass.music glass.ws.left glass.ws.right glass.status glass.time)
 glass() {
   local name="$1"; shift
   sketchybar --add bracket "$name" "$@" \
@@ -168,11 +167,10 @@ glass glass.ws.right ws.6 ws.7 ws.8 ws.9
 glass glass.status wifi bluetooth volume battery notifications vpn
 glass glass.time weather clock
 
-pkill -x glassbar 2>/dev/null
-if [ -x "$HOME/.local/bin/glassbar" ]; then
-  nohup "$HOME/.local/bin/glassbar" "${GLASS_BRACKETS[@]}" >"$HOME/.cache/glassbar.log" 2>&1 &
-  disown
-fi
+# launchd runs glassbar (~/Library/LaunchAgents/com.noman.glassbar.plist,
+# same bracket list); starting it from here failed now and then on a
+# reload. A signal makes it read the new places at once.
+pkill -USR1 -x glassbar 2>/dev/null
 
 # One watcher loop per bar start; see plugins/omniwm_watch.sh.
 pkill -f "sketchybar/plugins/omniwm_watch.sh" 2>/dev/null

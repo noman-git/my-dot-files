@@ -55,6 +55,7 @@ stow_packages() {
   # whole dir. Programs then write their own state next to the links.
   # ~/.config/karabiner is left out on purpose: Karabiner replaces
   # karabiner.json on save, which breaks a file link, so stow links the dir.
+  mkdir -p "$HOME/Library/LaunchAgents"
   mkdir -p "$HOME/.config/omniwm" "$HOME/.config/hammerspoon" "$HOME/.config/kitty" \
     "$HOME/.config/sketchybar" "$HOME/.config/wallust" "$HOME/.config/cava" "$HOME/.local/bin"
   local p
@@ -97,7 +98,10 @@ build_glassbar() {
   # place (it caches the old signature).
   rm -f "$HOME/.local/bin/glassbar"
   swiftc -O "$REPO/mac-desktop/.config/sketchybar/helpers/glassbar/main.swift" \
-    -o "$HOME/.local/bin/glassbar" || log "glassbar did not build; the bar works without glass"
+    -o "$HOME/.local/bin/glassbar" || { log "glassbar did not build; the bar works without glass"; return; }
+  # launchd runs it (stowed ~/Library/LaunchAgents/com.noman.glassbar.plist).
+  launchctl bootout "gui/$(id -u)/com.noman.glassbar" 2>/dev/null || true
+  launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.noman.glassbar.plist" || true
 }
 
 seed_colours() {
