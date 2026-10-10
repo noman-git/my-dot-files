@@ -4,6 +4,7 @@
 tap "hashicorp/tap"
 tap "dopplerhq/doppler"
 tap "felixkratz/formulae"
+tap "smudge/smudge"
 
 # Shell and terminal tools
 brew "stow"
@@ -53,6 +54,7 @@ cask "desktoppr"
 brew "displayplacer"
 brew "blueutil"
 brew "switchaudio-osx"
+brew "smudge/smudge/nightlight"
 
 # Apps
 cask "kitty"

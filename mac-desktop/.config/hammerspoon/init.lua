@@ -318,6 +318,26 @@ bind(mainMod, "s", "web search", function()
     searchChooser:show()
 end)
 
+-- Quit the active app, like KillActiveProcess.sh (a normal quit signal, not
+-- a force kill).
+bind({ "alt", "shift" }, "q", "quit the active app", function()
+    local app = hs.application.frontmostApplication()
+    if app then app:kill() end
+end)
+
+-- Night Shift on or off, like Hyprsunset.sh. Uses the nightlight CLI.
+bind(mainMod, "n", "night shift on or off", function()
+    local out = hs.execute("/opt/homebrew/bin/nightlight toggle && /opt/homebrew/bin/nightlight status")
+    hs.alert.show("Night Shift " .. (out or ""):gsub("%s+$", ""))
+end)
+
+-- Dark or light mode, like DarkLight.sh. Asks once for Automation access
+-- to System Events.
+bind({ "alt", "shift" }, "d", "dark or light mode", function()
+    hs.osascript.applescript('tell application "System Events" to tell appearance preferences '
+        .. 'to set dark mode to not dark mode')
+end)
+
 -- Power menu, like wlogout on Arch (Ctrl+Option+P). Log out, restart and
 -- shut down ask first.
 local function confirmed(action)

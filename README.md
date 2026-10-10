@@ -210,7 +210,12 @@ shortcuts. Window binds are in OmniWM; app binds are in Hammerspoon.
 | `Option+Shift+1..9`           | move window to workspace               |
 | `Option+Tab`, `Option+Shift+Tab` | next, previous workspace            |
 | `Option+U`, `Option+Shift+U`  | scratchpad (special workspace)         |
-| `Option+G`                    | tab group                              |
+| `Option+G`                    | tab group (scrolling layout only)      |
+| `Ctrl+Option+arrows` in Dwindle | move the window; toward a neighbour it joins that tile as a tab, on a tab it takes the tab out |
+| `Ctrl+Option+[`, `Ctrl+Option+]` | move the workspace to the monitor on the left, right |
+| `Option+Shift+Q`              | quit the active app                    |
+| `Option+N`                    | Night Shift on or off (`nightlight`)   |
+| `Option+Shift+D`              | dark or light mode                     |
 | `Option+Shift+I`              | toggle split                           |
 | `Option+Command+L`            | dwindle or scrolling layout            |
 | `Option+Shift+S`              | screenshot toolbar                     |

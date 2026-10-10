@@ -699,11 +699,11 @@ binding = "Control+Command+Grave"
 id = "focusMonitorLast"
 
 [[hotkeys]]
-binding = "Unassigned"
+binding = "Control+Option+Left Bracket"
 id = "moveWorkspaceToMonitor.left"
 
 [[hotkeys]]
-binding = "Unassigned"
+binding = "Control+Option+Right Bracket"
 id = "moveWorkspaceToMonitor.right"
 
 [[hotkeys]]
