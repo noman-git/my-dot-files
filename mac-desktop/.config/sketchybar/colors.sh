@@ -4,8 +4,8 @@
 # Glass style, like macOS Liquid Glass: a light frosted tint with a strong
 # blur (blur_radius in sketchybarrc), a thin bright edge and white text.
 # These stay fixed so the bar looks the same on every wallpaper.
-export GLASS_COLOR=0x26ffffff       # bar tint
-export GLASS_EDGE=0x47ffffff        # 1-point edge of the bar, menus, active pill
+export GLASS_COLOR=0x14ffffff       # bar tint (about 8%), clear glass
+export GLASS_EDGE=0x66ffffff        # 1-point bright edge of the bar, menus, active pill
 export GLASS_ACTIVE=0x38ffffff      # active workspace pill
 export POPUP_COLOR=0x991c1c1e       # menus: darker glass for readable text
 export ICON_COLOR=0xf2ffffff
