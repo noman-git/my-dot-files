@@ -52,6 +52,7 @@ cask "raycast"
 cask "desktoppr"
 brew "displayplacer"
 brew "blueutil"
+brew "switchaudio-osx"
 
 # Apps
 cask "kitty"

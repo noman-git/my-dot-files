@@ -40,9 +40,14 @@ sketchybar --add item front_app left \
     script="$PLUGIN_DIR/front_app.sh" \
   --subscribe front_app front_app_switched
 
-# Right side, from the right edge inwards. A click opens the matching
-# System Settings page or app.
+# Right side, from the right edge inwards. Wi-Fi, Bluetooth, volume and
+# battery open a menu under the item on click, like Control Center.
 SETTINGS="x-apple.systempreferences:com.apple"
+
+sketchybar --default popup.background.color="$POPUP_COLOR" \
+  popup.background.corner_radius=10 popup.background.border_width=1 \
+  popup.background.border_color="$MUTED_COLOR" popup.blur_radius=30 \
+  popup.align=right popup.y_offset=4
 
 sketchybar --add item clock right \
   --set clock update_freq=10 icon=󰥔 script="$PLUGIN_DIR/clock.sh" \
@@ -50,22 +55,44 @@ sketchybar --add item clock right \
 
 sketchybar --add item battery right \
   --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
-    click_script="open '$SETTINGS.Battery-Settings.extension'" \
-  --subscribe battery system_woke power_source_change
+  --subscribe battery system_woke power_source_change mouse.clicked mouse.exited.global \
+  --add item battery.source popup.battery \
+  --set battery.source icon=󰚥 \
+  --add item battery.state popup.battery \
+  --set battery.state icon=󰔟 \
+  --add item battery.settings popup.battery \
+  --set battery.settings icon=󰒓 label="Battery Settings" \
+    click_script="open '$SETTINGS.Battery-Settings.extension'; sketchybar --set battery popup.drawing=off"
 
 sketchybar --add item volume right \
   --set volume script="$PLUGIN_DIR/volume.sh" \
-  --subscribe volume volume_change mouse.clicked
+  --subscribe volume volume_change mouse.clicked mouse.exited.global \
+  --add slider volume.slider popup.volume 160 \
+  --set volume.slider script="$PLUGIN_DIR/volume_slider.sh" \
+    slider.highlight_color="$ACCENT_COLOR" slider.background.height=6 \
+    slider.background.corner_radius=3 slider.background.color="$MUTED_COLOR" \
+    slider.knob=󰝥 slider.knob.drawing=on icon=󰕾 \
+  --subscribe volume.slider mouse.clicked \
+  --add item volume.mute popup.volume \
+  --set volume.mute icon=󰝟 label="Mute" click_script="$PLUGIN_DIR/volume.sh mute"
 
 sketchybar --add item bluetooth right \
   --set bluetooth update_freq=30 script="$PLUGIN_DIR/bluetooth.sh" \
-    click_script="open '$SETTINGS.BluetoothSettings'" \
-  --subscribe bluetooth system_woke
+  --subscribe bluetooth system_woke mouse.clicked mouse.exited.global \
+  --add item bt.toggle popup.bluetooth \
+  --set bt.toggle icon=󰂯 click_script="$PLUGIN_DIR/bluetooth.sh toggle" \
+  --add item bt.settings popup.bluetooth \
+  --set bt.settings icon=󰒓 label="Bluetooth Settings" \
+    click_script="open '$SETTINGS.BluetoothSettings'; sketchybar --set bluetooth popup.drawing=off"
 
 sketchybar --add item wifi right \
-  --set wifi update_freq=30 script="$PLUGIN_DIR/wifi.sh" \
-    click_script="open '$SETTINGS.wifi-settings-extension'" \
-  --subscribe wifi wifi_change system_woke
+  --set wifi update_freq=30 label.drawing=off script="$PLUGIN_DIR/wifi.sh" \
+  --subscribe wifi wifi_change system_woke mouse.clicked mouse.exited.global \
+  --add item wifi.toggle popup.wifi \
+  --set wifi.toggle icon=󰖩 click_script="$PLUGIN_DIR/wifi.sh toggle" \
+  --add item wifi.settings popup.wifi \
+  --set wifi.settings icon=󰒓 label="Wi-Fi Settings" \
+    click_script="open '$SETTINGS.wifi-settings-extension'; sketchybar --set wifi popup.drawing=off"
 
 sketchybar --add item memory right \
   --set memory update_freq=10 icon=󰍛 script="$PLUGIN_DIR/memory.sh" \

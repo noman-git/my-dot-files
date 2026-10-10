@@ -28,7 +28,7 @@ local function whenModifiersUp(fn)
 end
 
 local function bind(mods, key, desc, fn)
-    hs.hotkey.bind(mods, key, desc, nil, fn)
+    hs.hotkey.bind(mods, key, nil, nil, fn)
 end
 
 -- One kitty process for every window, so OmniWM sees one app. `open -na`

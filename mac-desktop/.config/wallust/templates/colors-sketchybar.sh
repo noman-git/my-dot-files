@@ -5,3 +5,4 @@ export LABEL_COLOR=0xff{{foreground | strip}}
 export ACCENT_COLOR=0xff{{color12 | strip}}
 export MUTED_COLOR=0xff{{color8 | strip}}
 
+export POPUP_COLOR=0xd0{{background | strip}}
