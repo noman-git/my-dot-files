@@ -421,6 +421,22 @@ After an OmniWM upgrade that adds a key or a hotkey, OmniWM rewrites the file
 and keeps a copy as `settings.toml.pre-v4` (or the next version) next to it.
 Commit the rewritten file.
 
+### Claude Code notifications
+
+`~/.claude/settings.json` (not in this repo) runs `~/.local/bin/claude-notify`
+on the `Notification` and `Stop` hook events, asynchronously. The script
+reads the hook JSON and asks Hammerspoon (`hammerspoon://claude-notify`) to
+show a macOS notification titled "Claude Code · <project>": the question
+or permission text with a sound, or "Finished" without one. A click brings
+kitty to the front. On a new Mac add the hooks again:
+
+```json
+"hooks": {
+  "Notification": [{"hooks": [{"type": "command", "command": "/Users/<you>/.local/bin/claude-notify", "async": true, "timeout": 10}]}],
+  "Stop": [{"hooks": [{"type": "command", "command": "/Users/<you>/.local/bin/claude-notify", "async": true, "timeout": 10}]}]
+}
+```
+
 ### Known problems (2026-10-10)
 
 - Zen starts without its extensions and its compact mode shortcut until

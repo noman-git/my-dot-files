@@ -920,3 +920,18 @@ local cavaTimer = hs.timer.doEvery(2, function()
         if now - silentSince >= CAVA_SILENCE_SECONDS then stopCavaBar() end
     end
 end)
+
+-- Claude Code notifications, from the hooks in ~/.claude/settings.json
+-- (mac-desktop/.local/bin/claude-notify). A question or permission request
+-- plays a sound; a finished task is silent. A click brings kitty forward.
+hs.urlevent.bind("claude-notify", function(_, params)
+    local n = hs.notify.new(function()
+        hs.application.launchOrFocusByBundleID("net.kovidgoyal.kitty")
+    end, {
+        title = params.title or "Claude Code",
+        informativeText = params.body or "",
+        withdrawAfter = 0,
+    })
+    if params.event == "Notification" then n:soundName("Glass") end
+    n:send()
+end)

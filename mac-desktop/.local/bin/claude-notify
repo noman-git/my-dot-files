@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Claude Code hook (Notification and Stop events, ~/.claude/settings.json):
+# reads the hook JSON from stdin and shows a macOS notification through
+# Hammerspoon (hammerspoon://claude-notify). A click brings kitty to the
+# front. Hooks run with a plain PATH, so jq is called by its full path.
+
+JQ=/opt/homebrew/bin/jq
+input="$(cat)"
+event="$(printf '%s' "$input" | "$JQ" -r '.hook_event_name // empty')"
+project="$(basename "$(printf '%s' "$input" | "$JQ" -r '.cwd // empty')")"
+
+case "$event" in
+  Notification) body="$(printf '%s' "$input" | "$JQ" -r '.message // "Claude needs your input"')" ;;
+  Stop) body="Finished" ;;
+  *) exit 0 ;;
+esac
+
+title="Claude Code${project:+ · $project}"
+url="hammerspoon://claude-notify?title=$("$JQ" -rn --arg s "$title" '$s|@uri')&body=$("$JQ" -rn --arg s "$body" '$s|@uri')&event=$event"
+open -g "$url"
