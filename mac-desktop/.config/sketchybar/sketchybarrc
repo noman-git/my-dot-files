@@ -64,10 +64,12 @@ sketchybar --add item workspaces left \
 # it, and --move does not reorder popup items.
 SETTINGS="x-apple.systempreferences:com.apple"
 
-sketchybar --default popup.background.color="$POPUP_COLOR" \
-  popup.background.corner_radius=20 popup.background.border_width=1 \
-  popup.background.border_color="$GLASS_EDGE" popup.blur_radius=50 \
-  popup.background.shadow.drawing=on popup.align=center popup.y_offset=8
+# Menus: glassbar draws real glass behind an open menu, so SketchyBar's own
+# menu background stays transparent; it still gives the menu its size.
+sketchybar --default popup.background.color=0x00000000 \
+  popup.background.corner_radius=20 popup.background.border_width=0 \
+  popup.blur_radius=0 popup.background.shadow.drawing=off \
+  popup.align=center popup.y_offset=8
 
 # slots <parent> <prefix> <count>: hidden menu entries prefix.1 .. prefix.count
 slots() {

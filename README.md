@@ -300,7 +300,11 @@ reads its place with `sketchybar --query` once a second, and at once when
 (`mac-desktop/Library/LaunchAgents/com.noman.glassbar.plist`, stowed into
 `~/Library/LaunchAgents`, errors in `/tmp/glassbar.err`) and restarts it if
 it stops; starting it from `sketchybarrc` failed now and then on a reload.
-OmniWM does not manage its windows. `glassbar --demo` opens a window with
+Open menus get glass too: SketchyBar draws a menu as windows at level 101
+and reports no places for them, so glassbar reads them from the macOS
+window list every 0.1 seconds and puts one glass panel (corner radius 20,
+30% tint) at level 100 behind them; SketchyBar's own menu background is
+transparent. OmniWM does not manage its windows. `glassbar --demo` opens a window with
 six glass variants over coloured stripes, to compare styles. An empty
 `spacer.time` item keeps the two right capsules apart, because a capsule
 covers its items' padding. The active workspace is a white pill with dark

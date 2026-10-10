@@ -7,7 +7,9 @@
 //
 // It reads each bracket's place from `sketchybar --query <bracket>` once a
 // second, and at once on SIGUSR1 (plugins/workspaces.sh sends it after a
-// workspace change). sketchybarrc starts it; install_mac.sh builds it.
+// workspace change). Open menus get glass too (see refreshMenus). launchd
+// runs it (Library/LaunchAgents/com.noman.glassbar.plist); install_mac.sh
+// builds it.
 
 import AppKit
 
@@ -42,6 +44,31 @@ final class ActiveLookPanel: NSPanel {
 
 var panels: [String: NSPanel] = [:]
 
+// Menus: SketchyBar draws an open menu as windows at level 101, one per
+// entry plus its background, and reports no places for them. The menu
+// glass is read from the window list instead, which needs no process per
+// check, so it runs every 0.1 s and follows a menu as it opens and grows.
+let menuLevel = 101
+let menuGlassLevel = NSWindow.Level(rawValue: 100)
+let menuCornerRadius: CGFloat = 20
+let menuTint = NSColor(white: 0, alpha: 0.3)
+var menuPanels: [Int: NSPanel] = [:]
+
+func sketchybarMenuRects() -> [CGRect] {
+    guard let list = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID)
+            as? [[String: Any]] else { return [] }
+    var rects: [CGRect] = []
+    for w in list {
+        guard (w[kCGWindowOwnerName as String] as? String) == "sketchybar",
+              (w[kCGWindowLayer as String] as? Int) == menuLevel,
+              let b = w[kCGWindowBounds as String] as? [String: Any],
+              let rect = CGRect(dictionaryRepresentation: b as CFDictionary),
+              rect.minX > -9000, rect.width > 2, rect.height > 2 else { continue }
+        rects.append(rect)
+    }
+    return rects
+}
+
 func query(_ name: String) -> [String: NSRect] {
     let task = Process()
     task.executableURL = URL(fileURLWithPath: sketchybar)
@@ -65,10 +92,10 @@ func query(_ name: String) -> [String: NSRect] {
     return out
 }
 
-func makePanel() -> NSPanel {
+func makePanel(level: NSWindow.Level = glassLevel, tint: NSColor = glassTint) -> NSPanel {
     let panel = ActiveLookPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel],
                                 backing: .buffered, defer: false)
-    panel.level = glassLevel
+    panel.level = level
     panel.isOpaque = false
     panel.backgroundColor = .clear
     panel.hasShadow = false
@@ -76,10 +103,33 @@ func makePanel() -> NSPanel {
     panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
     let glass = NSGlassEffectView()
     glass.style = glassStyle
-    glass.tintColor = glassTint
+    glass.tintColor = tint
     glass.effectIsInteractive = glassInteractive
     panel.contentView = glass
     return panel
+}
+
+func refreshMenus() {
+    guard let mainHeight = NSScreen.screens.first?.frame.height else { return }
+    // One glass panel per screen with an open menu: the union of its windows.
+    var unions: [Int: CGRect] = [:]
+    for r in sketchybarMenuRects() {
+        let center = NSPoint(x: r.midX, y: mainHeight - r.midY)
+        let screen = NSScreen.screens.firstIndex { $0.frame.contains(center) } ?? 0
+        unions[screen] = unions[screen].map { $0.union(r) } ?? r
+    }
+    for (screen, r) in unions {
+        let frame = NSRect(x: r.minX, y: mainHeight - r.maxY, width: r.width, height: r.height)
+        let panel = menuPanels[screen] ?? makePanel(level: menuGlassLevel, tint: menuTint)
+        menuPanels[screen] = panel
+        if panel.frame != frame { panel.setFrame(frame, display: true) }
+        (panel.contentView as? NSGlassEffectView)?.cornerRadius = menuCornerRadius
+        if !panel.isVisible { panel.orderFrontRegardless() }
+    }
+    for (screen, panel) in menuPanels where unions[screen] == nil {
+        panel.orderOut(nil)
+        menuPanels[screen] = nil
+    }
 }
 
 func refresh() {
@@ -185,6 +235,8 @@ usr1.resume()
 
 let timer = Timer(timeInterval: 1.0, repeats: true) { _ in refresh() }
 RunLoop.main.add(timer, forMode: .common)
+let menuTimer = Timer(timeInterval: 0.1, repeats: true) { _ in refreshMenus() }
+RunLoop.main.add(menuTimer, forMode: .common)
 DispatchQueue.main.async { refresh() }
 
 app.run()
