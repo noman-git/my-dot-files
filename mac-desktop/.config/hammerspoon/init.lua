@@ -80,7 +80,6 @@ hs.alert.show("Hammerspoon config loaded")
 --   hammerspoon://wifi-menu          scan and fill the wifi popup
 --   hammerspoon://wifi-join?ssid=X   join X (saved: no password; new: prompt)
 local SKETCHYBAR = "/opt/homebrew/bin/sketchybar"
-local WIFI_SETTINGS = "x-apple.systempreferences:com.apple.wifi-settings-extension"
 
 local function sketchybar(args)
     hs.task.new(SKETCHYBAR, nil, args):start()
@@ -96,57 +95,68 @@ local function savedNetworks()
     return saved
 end
 
+-- Fill the menu slots wifi.net.1-12 that sketchybarrc makes; hide the rest.
+local WIFI_SLOTS = 12
 local function fillWifiMenu(names, current)
     local saved = savedNetworks()
-    local args = { "--remove", "/wifi\\.net\\..*/", "--remove", "wifi.settings" }
-    for i, name in ipairs(names) do
-        local item = "wifi.net." .. i
-        local icon = "󰖩"
-        if name == current then icon = "󰄬" elseif saved[name] then icon = "󰤨" end
-        local url = "hammerspoon://wifi-join?ssid=" .. hs.http.encodeForQuery(name)
-        for _, a in ipairs({ "--add", "item", item, "popup.wifi",
-            "--set", item, "icon=" .. icon, "label=" .. name,
-            "click_script=open -g '" .. url .. "'; " .. SKETCHYBAR .. " --set wifi popup.drawing=off" }) do
-            table.insert(args, a)
+    local args = {}
+    local function add(...) for _, a in ipairs({ ... }) do table.insert(args, a) end end
+    for i = 1, WIFI_SLOTS do
+        local item, name = "wifi.net." .. i, names[i]
+        if name then
+            local icon = "󰖩"
+            if name == current then icon = "󰄬" elseif saved[name] then icon = "󰤨" end
+            local url = "hammerspoon://wifi-join?ssid=" .. hs.http.encodeForQuery(name)
+            add("--set", item, "drawing=on", "icon=" .. icon, "label=" .. name,
+                "click_script=open -g '" .. url .. "'; " .. SKETCHYBAR .. " --set wifi popup.drawing=off")
+        else
+            add("--set", item, "drawing=off")
         end
-    end
-    for _, a in ipairs({ "--add", "item", "wifi.settings", "popup.wifi",
-        "--set", "wifi.settings", "icon=󰒓", "label=Wi-Fi Settings",
-        "click_script=open '" .. WIFI_SETTINGS .. "'; " .. SKETCHYBAR .. " --set wifi popup.drawing=off" }) do
-        table.insert(args, a)
     end
     sketchybar(args)
 end
 
+-- Network names, current first, then strongest, at most WIFI_SLOTS. Without
+-- Location access the names are hidden, so it falls back to the saved ones.
+local function networkNames(networks, current)
+    local seen, names = {}, {}
+    if current then
+        seen[current] = true
+        table.insert(names, current)
+    end
+    table.sort(networks, function(a, b) return (a.rssi or -100) > (b.rssi or -100) end)
+    for _, n in ipairs(networks) do
+        local name = n.ssid
+        if name and name ~= "" and not seen[name] and #names < WIFI_SLOTS then
+            seen[name] = true
+            table.insert(names, name)
+        end
+    end
+    if #names == 0 then
+        for name in pairs(savedNetworks()) do table.insert(names, name) end
+        table.sort(names)
+    end
+    return names
+end
+
+local function cachedNetworks()
+    return (hs.wifi.interfaceDetails() or {}).cachedScanResults or {}
+end
+
+-- Show the last scan at once, then the new scan when it is done.
 local wifiScan
 hs.urlevent.bind("wifi-menu", function()
     local current = hs.wifi.currentNetwork()
-    fillWifiMenu({ "Scanning…" }, nil)
+    local cached = cachedNetworks()
+    if #cached > 0 then
+        fillWifiMenu(networkNames(cached, current), current)
+    else
+        fillWifiMenu({ "Scanning…" }, nil)
+    end
     wifiScan = hs.wifi.backgroundScan(function(networks)
-        -- On an error the callback gets a string. Then use the last cached
-        -- scan, which can be empty.
-        if type(networks) ~= "table" then
-            networks = (hs.wifi.interfaceDetails() or {}).cachedScanResults or {}
-        end
-        local seen, names = {}, {}
-        if current then
-            seen[current] = true
-            table.insert(names, current)
-        end
-        table.sort(networks, function(a, b) return (a.rssi or -100) > (b.rssi or -100) end)
-        for _, n in ipairs(networks) do
-            local name = n.ssid
-            if name and name ~= "" and not seen[name] and #names < 12 then
-                seen[name] = true
-                table.insert(names, name)
-            end
-        end
-        if #names == 0 then
-            -- No Location access: names are hidden, so offer the saved networks.
-            for name in pairs(savedNetworks()) do table.insert(names, name) end
-            table.sort(names)
-        end
-        fillWifiMenu(names, current)
+        -- On an error the callback gets a string; use the cached scan then.
+        if type(networks) ~= "table" then networks = cachedNetworks() end
+        fillWifiMenu(networkNames(networks, current), current)
     end)
 end)
 

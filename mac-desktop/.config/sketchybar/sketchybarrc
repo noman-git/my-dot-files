@@ -42,12 +42,25 @@ sketchybar --add item front_app left \
 
 # Right side, from the right edge inwards. Wi-Fi, Bluetooth, volume and
 # battery open a menu under the item on click, like Control Center.
+#
+# Menu entries are fixed slots made here, hidden until a script fills them.
+# Removing and adding popup items while a menu is open left an empty,
+# too-large menu box and stopped the menu from closing when the pointer left
+# it, and --move does not reorder popup items.
 SETTINGS="x-apple.systempreferences:com.apple"
 
 sketchybar --default popup.background.color="$POPUP_COLOR" \
   popup.background.corner_radius=10 popup.background.border_width=1 \
   popup.background.border_color="$MUTED_COLOR" popup.blur_radius=30 \
-  popup.align=right popup.y_offset=4
+  popup.align=center popup.y_offset=4
+
+# slots <parent> <prefix> <count>: hidden menu entries prefix.1 .. prefix.count
+slots() {
+  local i
+  for i in $(seq 1 "$3"); do
+    sketchybar --add item "$2.$i" "popup.$1" --set "$2.$i" drawing=off
+  done
+}
 
 sketchybar --add item clock right \
   --set clock update_freq=10 icon=󰥔 script="$PLUGIN_DIR/clock.sh" \
@@ -75,18 +88,31 @@ sketchybar --add item volume right \
   --subscribe volume.slider mouse.clicked \
   --add item volume.mute popup.volume \
   --set volume.mute icon=󰝟 label="Mute" click_script="$PLUGIN_DIR/volume.sh mute"
+slots volume volume.out 6
 
 sketchybar --add item bluetooth right \
   --set bluetooth update_freq=30 script="$PLUGIN_DIR/bluetooth.sh" \
   --subscribe bluetooth system_woke mouse.clicked mouse.exited.global \
   --add item bt.toggle popup.bluetooth \
   --set bt.toggle icon=󰂯 click_script="$PLUGIN_DIR/bluetooth.sh toggle"
+slots bluetooth bt.dev 8
+sketchybar --add item bt.scan popup.bluetooth \
+  --set bt.scan icon=󰂰 label="Search for New Devices" \
+    click_script="$PLUGIN_DIR/bluetooth.sh scan"
+slots bluetooth bt.new 8
+sketchybar --add item bt.settings popup.bluetooth \
+  --set bt.settings icon=󰒓 label="Bluetooth Settings" \
+    click_script="open '$SETTINGS.BluetoothSettings'; sketchybar --set bluetooth popup.drawing=off"
 
 sketchybar --add item wifi right \
   --set wifi update_freq=30 label.drawing=off script="$PLUGIN_DIR/wifi.sh" \
   --subscribe wifi wifi_change system_woke mouse.clicked mouse.exited.global \
   --add item wifi.toggle popup.wifi \
   --set wifi.toggle icon=󰖩 click_script="$PLUGIN_DIR/wifi.sh toggle"
+slots wifi wifi.net 12
+sketchybar --add item wifi.settings popup.wifi \
+  --set wifi.settings icon=󰒓 label="Wi-Fi Settings" \
+    click_script="open '$SETTINGS.wifi-settings-extension'; sketchybar --set wifi popup.drawing=off"
 
 sketchybar --add item memory right \
   --set memory update_freq=10 icon=󰍛 script="$PLUGIN_DIR/memory.sh" \
