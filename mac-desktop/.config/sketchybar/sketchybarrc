@@ -114,14 +114,6 @@ sketchybar --add item wifi.settings popup.wifi \
   --set wifi.settings icon=󰒓 label="Wi-Fi Settings" \
     click_script="open '$SETTINGS.wifi-settings-extension'; sketchybar --set wifi popup.drawing=off"
 
-sketchybar --add item memory right \
-  --set memory update_freq=10 icon=󰍛 script="$PLUGIN_DIR/memory.sh" \
-    click_script="open -a 'Activity Monitor'"
-
-sketchybar --add item cpu right \
-  --set cpu update_freq=5 icon=󰻠 script="$PLUGIN_DIR/cpu.sh" \
-    click_script="open -a 'Activity Monitor'"
-
 # One watcher loop per bar start; see plugins/omniwm_watch.sh.
 pkill -f "sketchybar/plugins/omniwm_watch.sh" 2>/dev/null
 pkill -f "omniwmctl watch active-workspace" 2>/dev/null

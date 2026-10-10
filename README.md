@@ -229,9 +229,8 @@ bind focuses the app, or opens it if it is not running. The list is `apps` in
 
 SketchyBar is translucent (`BAR_COLOR` alpha `0x40` plus blur) and shows all
 9 OmniWM workspaces with an icon for each app on them and the front app. On
-the right: CPU, memory, Wi-Fi (IP address; macOS hides the network name from
-programs without Location access), Bluetooth (connected devices, through
-`blueutil`), volume, battery and the clock. Wi-Fi, Bluetooth, volume and
+the right: Wi-Fi, Bluetooth (connected devices, through `blueutil`), volume,
+battery and the clock. Wi-Fi, Bluetooth, volume and
 battery open a menu under the item. The Wi-Fi menu lists the networks
 around; Hammerspoon fills it (`hammerspoon://wifi-menu`) because network
 names need Location access, which only an app can get. Without it, the menu
