@@ -48,10 +48,10 @@ sketchybar --add item volume right \
   --set volume script="$PLUGIN_DIR/volume.sh" \
   --subscribe volume volume_change
 
-# One watcher per bar start. --reconnect keeps it alive across OmniWM restarts.
+# One watcher loop per bar start; see plugins/omniwm_watch.sh.
+pkill -f "sketchybar/plugins/omniwm_watch.sh" 2>/dev/null
 pkill -f "omniwmctl watch active-workspace" 2>/dev/null
-nohup omniwmctl watch active-workspace,windows-changed --reconnect \
-  --exec sketchybar --trigger omniwm_change >/dev/null 2>&1 &
+nohup "$PLUGIN_DIR/omniwm_watch.sh" >/dev/null 2>&1 &
 disown
 
 sketchybar --update
