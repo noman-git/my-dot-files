@@ -282,11 +282,15 @@ in `hammerspoon/init.lua`.
 
 ### Bar
 
-SketchyBar has no background: the wallpaper or window behind shows
-through. The active workspace pill and the menus use a glass style like
-macOS Liquid Glass (light tint, blur, 1-point bright edge). Text and icons
-are white with a soft shadow for light wallpapers. The colours in
-`colors.sh` are fixed, so the bar looks the same on every wallpaper. The 9
+SketchyBar has no background. Its items sit in glass capsules like the
+macOS Control Center tiles: music, workspaces 1 to 5, workspaces 6 to 9,
+status (Wi-Fi to VPN) and time (weather and clock). Each capsule is a
+SketchyBar bracket with a dark see-through tint, its own `blur_radius`, and
+a 1-point bright edge; an empty `spacer.time` item keeps the two right
+capsules apart, because a capsule covers its items' padding. The active
+workspace is a white pill with dark text, like an active Control Center
+toggle. The colours in `colors.sh` are fixed, so the bar looks the same on
+every wallpaper. The 9
 OmniWM workspaces, each with an icon for every app on it, sit around the
 camera notch: 1 to 5 left of it (position `q`), 6 to 9 right of it (`e`). A
 workspace shows at most 2 app icons, then `+N`, so 6 to 9 do not grow into

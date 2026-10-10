@@ -46,9 +46,8 @@ for i in 5 4 3 2 1 6 7 8 9; do
     --set "ws.$i" icon="$i" icon.color="$MUTED_COLOR" \
       label.font="sketchybar-app-font:Regular:14.0" label.drawing=off \
       label.padding_left=2 label.padding_right=8 label.y_offset=-1 \
-      background.color="$GLASS_ACTIVE" background.corner_radius=10 \
-      background.border_color="$GLASS_EDGE" background.border_width=1 \
-      background.height=24 background.drawing=off \
+      background.color="$ACTIVE_COLOR" background.corner_radius=11 \
+      background.height=22 background.drawing=off \
       click_script="omniwmctl command switch-workspace $i"
 done
 
@@ -66,7 +65,7 @@ sketchybar --add item workspaces left \
 SETTINGS="x-apple.systempreferences:com.apple"
 
 sketchybar --default popup.background.color="$POPUP_COLOR" \
-  popup.background.corner_radius=14 popup.background.border_width=1 \
+  popup.background.corner_radius=20 popup.background.border_width=1 \
   popup.background.border_color="$GLASS_EDGE" popup.blur_radius=50 \
   popup.background.shadow.drawing=on popup.align=center popup.y_offset=8
 
@@ -88,6 +87,10 @@ sketchybar --add item weather right \
   --add item weather.now popup.weather --set weather.now icon=󰔏
 slots weather weather.day 3
 sketchybar --set weather.day.1 drawing=on --set weather.day.2 drawing=on --set weather.day.3 drawing=on
+
+# Gap between the time and status capsules. A capsule covers the padding of
+# its own items, so the gap is an empty item outside both.
+sketchybar --add item spacer.time right --set spacer.time width=8 icon.drawing=off label.drawing=off
 
 sketchybar --add item vpn right \
   --set vpn update_freq=10 updates=on icon=󰦞 label.drawing=off script="$PLUGIN_DIR/vpn.sh" \
@@ -146,6 +149,21 @@ slots wifi wifi.net 12
 sketchybar --add item wifi.settings popup.wifi \
   --set wifi.settings icon=󰒓 label="Wi-Fi Settings" \
     click_script="open '$SETTINGS.wifi-settings-extension'; sketchybar --set wifi popup.drawing=off"
+
+# Glass capsules, like the Control Center tiles: a bracket draws one pill
+# behind a group of items, with its own blur.
+glass() {
+  local name="$1"; shift
+  sketchybar --add bracket "$name" "$@" \
+    --set "$name" background.color="$CAPSULE_COLOR" \
+      background.border_color="$GLASS_EDGE" background.border_width=1 \
+      background.corner_radius=14 background.height=28 blur_radius=30
+}
+glass glass.music cava
+glass glass.ws.left ws.1 ws.2 ws.3 ws.4 ws.5
+glass glass.ws.right ws.6 ws.7 ws.8 ws.9
+glass glass.status wifi bluetooth volume battery notifications vpn
+glass glass.time weather clock
 
 # One watcher loop per bar start; see plugins/omniwm_watch.sh.
 pkill -f "sketchybar/plugins/omniwm_watch.sh" 2>/dev/null
