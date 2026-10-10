@@ -552,3 +552,74 @@ local function showHints()
 end
 bind(mainMod, "h", "key hints", showHints)
 bind({ "alt", "shift" }, "k", "search keybinds", showHints)
+
+-- Music, like RofiBeats.sh (Option+Shift+M): the online stations and YouTube
+-- links from the Arch list (hypr-desktop/.config/rofi/online_music.list,
+-- read from the repo so both machines share one list) and the files in
+-- ~/Music, played with mpv (yt-dlp for YouTube). One player at a time.
+local MPV = "/opt/homebrew/bin/mpv"
+local MUSIC_LIST = os.getenv("HOME") .. "/my-dot-files/hypr-desktop/.config/rofi/online_music.list"
+local MUSIC_DIR = os.getenv("HOME") .. "/Music"
+local musicTask, musicTitle
+
+local function stopMusic()
+    if musicTask and musicTask:isRunning() then musicTask:terminate() end
+    musicTask, musicTitle = nil, nil
+end
+
+local function playMusic(title, args)
+    stopMusic()
+    local full = { "--no-video", "--really-quiet" }
+    for _, a in ipairs(args) do table.insert(full, a) end
+    musicTask = hs.task.new(MPV, function(code)
+        if code ~= 0 and musicTitle == title then hs.alert.show("Could not play " .. title) end
+    end, full)
+    -- yt-dlp lives in Homebrew, which is not on the PATH of Hammerspoon tasks.
+    musicTask:setEnvironment({ PATH = "/opt/homebrew/bin:/usr/bin:/bin", HOME = os.getenv("HOME") })
+    musicTask:start()
+    musicTitle = title
+    hs.alert.show("Now playing: " .. title)
+end
+
+local musicChooser = hs.chooser.new(function(choice)
+    if not choice then return end
+    if choice.stop then
+        stopMusic()
+        hs.alert.show("Music stopped")
+    elseif choice.shuffleLocal then
+        playMusic("Shuffle ~/Music", { "--shuffle", "--loop-playlist", MUSIC_DIR })
+    else
+        playMusic(choice.text, choice.url and { "--shuffle", choice.url } or { choice.path })
+    end
+end)
+musicChooser:placeholderText("Music")
+musicChooser:searchSubText(true)
+
+bind({ "alt", "shift" }, "m", "music", function()
+    local choices = {}
+    if musicTitle then
+        table.insert(choices, { text = "Stop music", subText = "Playing: " .. musicTitle, stop = true })
+    end
+    local f = io.open(MUSIC_LIST)
+    if f then
+        for line in f:lines() do
+            local name, url = line:match("^(.-)|(.+)$")
+            if name then table.insert(choices, { text = name, subText = "Online", url = url }) end
+        end
+        f:close()
+    end
+    local out = hs.execute("find -L '" .. MUSIC_DIR .. "' -type f \\( -iname '*.mp3' -o -iname '*.flac'"
+        .. " -o -iname '*.wav' -o -iname '*.ogg' -o -iname '*.m4a' \\) 2>/dev/null | sort") or ""
+    local localCount = 0
+    for path in out:gmatch("[^\n]+") do
+        localCount = localCount + 1
+        table.insert(choices, { text = path:match("([^/]+)$"), subText = "~/Music", path = path })
+    end
+    if localCount > 0 then
+        table.insert(choices, 1 + (musicTitle and 1 or 0),
+            { text = "Shuffle all local music", subText = localCount .. " files in ~/Music", shuffleLocal = true })
+    end
+    musicChooser:choices(choices)
+    musicChooser:query("")
+    musicChooser:show()
+end)

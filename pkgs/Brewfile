@@ -54,6 +54,8 @@ cask "desktoppr"
 brew "blueutil"
 brew "switchaudio-osx"
 brew "smudge/smudge/nightlight"
+brew "mpv"
+brew "yt-dlp"
 
 # Apps
 cask "kitty"
