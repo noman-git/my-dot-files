@@ -29,9 +29,12 @@ end
 
 -- hs.hotkey.bind shifts its arguments when the message is not a string, so
 -- (mods, key, nil, fn) makes fn the released function. A string message
--- shows an alert on every press, so no message is passed.
+-- shows an alert on every press, so no message is passed. Every bind is also
+-- recorded for the key hints (Option+H).
+local hammerspoonBinds = {}
 local function bind(mods, key, desc, fn)
     hs.hotkey.bind(mods, key, nil, fn)
+    table.insert(hammerspoonBinds, { mods = mods, key = key, desc = desc, fn = fn })
 end
 
 -- One kitty process for every window, so OmniWM sees one app. `open -na`
@@ -314,3 +317,106 @@ bind(mainMod, "s", "web search", function()
     searchChooser:choices({})
     searchChooser:show()
 end)
+
+-- Power menu, like wlogout on Arch (Ctrl+Option+P). Log out, restart and
+-- shut down ask first.
+local function confirmed(action)
+    return hs.dialog.blockAlert(action .. "?", "", action, "Cancel") == action
+end
+local powerActions = {
+    { text = "Lock", subText = "Lock the screen", run = hs.caffeinate.lockScreen },
+    { text = "Sleep", subText = "Put the Mac to sleep", run = hs.caffeinate.systemSleep },
+    { text = "Log Out", subText = "Close all apps and log out",
+        run = function() if confirmed("Log Out") then hs.caffeinate.logOut() end end },
+    { text = "Restart", subText = "Restart the Mac",
+        run = function() if confirmed("Restart") then hs.caffeinate.restartSystem() end end },
+    { text = "Shut Down", subText = "Turn the Mac off",
+        run = function() if confirmed("Shut Down") then hs.caffeinate.shutdownSystem() end end },
+}
+local powerChooser = hs.chooser.new(function(choice)
+    if choice then powerActions[choice.index].run() end
+end)
+powerChooser:placeholderText("Power")
+local powerChoices = {}
+for i, a in ipairs(powerActions) do
+    table.insert(powerChoices, { text = a.text, subText = a.subText, index = i })
+end
+powerChooser:choices(powerChoices)
+bind({ "ctrl", "alt" }, "p", "power menu", function() powerChooser:show() end)
+
+-- Key hints, like KeyHints.sh and KeyBinds.sh on Arch (Option+H and
+-- Option+Shift+K): a searchable list of the Hammerspoon binds above, the
+-- OmniWM binds read from its settings.toml, and the Karabiner and macOS keys.
+-- Enter on a Hammerspoon bind runs it.
+local MOD_NAMES = { ctrl = "Ctrl", alt = "Option", shift = "Shift", cmd = "Cmd" }
+local function chord(mods, key)
+    local set = {}
+    for _, m in ipairs(mods) do set[m] = true end
+    local parts = {}
+    if set.ctrl and set.alt and set.shift and set.cmd then
+        parts = { "Hyper" }
+    else
+        for _, m in ipairs({ "ctrl", "alt", "shift", "cmd" }) do
+            if set[m] then table.insert(parts, MOD_NAMES[m]) end
+        end
+    end
+    local k = key == "return" and "Return" or key == "space" and "Space" or key:upper()
+    table.insert(parts, k)
+    return table.concat(parts, "+")
+end
+
+-- "moveToWorkspace.0" -> "move to workspace 1", "focus.left" -> "focus left"
+local function omniwmLabel(id)
+    local name, arg = id:match("^([^.]+)%.?(.*)$")
+    local words = name:gsub("(%u)", " %1"):lower()
+    if arg:match("^%d+$") and (name == "switchWorkspace" or name == "moveToWorkspace"
+        or name == "focusColumn" or name == "moveColumnToWorkspace") then
+        arg = tostring(tonumber(arg) + 1)
+    end
+    arg = arg:gsub("(%d+)", " %1 "):gsub("(%u)", " %1"):lower()
+    return (words .. " " .. arg):gsub("%.", " "):gsub("%s+", " "):gsub("%s$", "")
+end
+
+local function omniwmBinds()
+    local f = io.open(os.getenv("HOME") .. "/.config/omniwm/settings.toml")
+    if not f then return {} end
+    local text = f:read("*a")
+    f:close()
+    local out = {}
+    for binding, id in text:gmatch('%[%[hotkeys%]%]%s*binding = "([^"]+)"%s*id = "([^"]+)"') do
+        if binding ~= "Unassigned" then
+            table.insert(out, { text = binding:gsub("Control", "Ctrl"):gsub("Command", "Cmd"),
+                subText = "OmniWM: " .. omniwmLabel(id) })
+        end
+    end
+    return out
+end
+
+local EXTRA_HINTS = {
+    { text = "Caps Lock (tap)", subText = "Karabiner: Escape" },
+    { text = "Caps Lock (hold)", subText = "Karabiner: Hyper (Ctrl+Option+Shift+Cmd)" },
+    { text = "Hyper+N", subText = "macOS: show the Notification Center" },
+    { text = "Cmd+Shift+3 / 4 / 5", subText = "macOS: screenshot of the screen / an area / toolbar with recording" },
+    { text = "Cmd+Ctrl+Shift+4", subText = "macOS: screenshot of an area to the clipboard" },
+    { text = "Cmd+4 (in Spotlight)", subText = "macOS: clipboard history" },
+}
+
+local hintsChooser = hs.chooser.new(function(choice)
+    if choice and choice.index then hammerspoonBinds[choice.index].fn() end
+end)
+hintsChooser:placeholderText("Search keybinds")
+hintsChooser:rows(14)
+hintsChooser:searchSubText(true)
+local function showHints()
+    local choices = {}
+    for i, b in ipairs(hammerspoonBinds) do
+        table.insert(choices, { text = chord(b.mods, b.key), subText = "Hammerspoon: " .. b.desc, index = i })
+    end
+    for _, c in ipairs(omniwmBinds()) do table.insert(choices, c) end
+    for _, c in ipairs(EXTRA_HINTS) do table.insert(choices, c) end
+    hintsChooser:choices(choices)
+    hintsChooser:query("")
+    hintsChooser:show()
+end
+bind(mainMod, "h", "key hints", showHints)
+bind({ "alt", "shift" }, "k", "search keybinds", showHints)

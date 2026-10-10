@@ -217,6 +217,8 @@ shortcuts. Window binds are in OmniWM; app binds are in Hammerspoon.
 | `Control+Option+L`            | lock screen                            |
 | `Control+Option+Space`        | OmniWM command palette                 |
 | `Caps Lock` (tap)             | Escape                                 |
+| `Option+H`, `Option+Shift+K`  | key hints: search all binds            |
+| `Ctrl+Option+P`               | power menu: lock, sleep, log out, restart, shut down |
 | `Option+W`                    | wallpaper picker (`~/Pictures/wallpapers`) |
 | `Control+Option+W`            | random wallpaper                       |
 | `Option+S`                    | web search (Google)                    |
