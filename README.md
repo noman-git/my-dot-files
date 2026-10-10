@@ -74,6 +74,21 @@ setup_shell.sh        chsh to zsh
 Every step of `install_arch.sh` and `install_system.sh` can be rerun.
 `sudo ./install_system.sh --dry-run` prints what would change without root.
 
+### Existing Arch machine, after the macOS merge (2026-10-10)
+
+The macOS work moved btop and fastfetch out of `hypr-desktop` into their own
+packages and added the `claude` package. On a machine set up before that:
+
+1. `git pull` in `~/my-dot-files`.
+2. If `~/.claude/settings.json` is a real file, merge its hooks and settings
+   into `claude/.claude/settings.json`, then move the file aside.
+   `install_arch.sh` skips `claude` while the real file is there.
+3. `./install_arch.sh`. It removes the old `~/.config/btop` and
+   `~/.config/fastfetch` links into `hypr-desktop` before stow. By hand:
+   remove those two links, then `stow -R hypr-desktop btop fastfetch claude`.
+4. `:Lazy restore` and `:TSUpdate` in nvim (12 plugins moved to newer
+   commits).
+
 ## NVIDIA or not
 
 Detection reads the PCI bus for vendor `0x10de` with a display class. With an
