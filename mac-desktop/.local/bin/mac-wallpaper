@@ -5,6 +5,10 @@
 #   mac-wallpaper           recolour from the last image set with this script
 set -euo pipefail
 
+# Hammerspoon runs this with the plain macOS PATH, which has neither
+# Homebrew (wallust deps), /usr/local/bin (desktoppr) nor cargo (wallust).
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.cargo/bin:$PATH"
+
 STATE="$HOME/.cache/.current_wallpaper"
 WALLUST="$(command -v wallust || echo "$HOME/.cargo/bin/wallust")"
 
