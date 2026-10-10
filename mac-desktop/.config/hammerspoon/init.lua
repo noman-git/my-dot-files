@@ -171,6 +171,41 @@ local guardKeyTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, functio
 end)
 guardKeyTap:start()
 
+-- Short-lived system UI (screenshot, Raycast, Spotlight): when it closes,
+-- macOS gives the focus back to the app that had it, and OmniWM jumps to
+-- that app's workspace even when you were on another (empty) one. When the
+-- focus goes back to that same app and the workspace changed, switch back.
+-- Opening a different app from Raycast is a different app, so it stays.
+local TRANSIENT_APPS = {
+    ["com.apple.screencaptureui"] = true,
+    ["com.apple.screenshot.launcher"] = true,
+    ["com.raycast.macos"] = true,
+    ["com.apple.Spotlight"] = true,
+}
+local lastFrontApp, transient = nil, nil
+local transientWatcher = hs.application.watcher.new(function(_, event, app)
+    local id = app and app:bundleID()
+    if not id then return end
+    if event == hs.application.watcher.activated then
+        if TRANSIENT_APPS[id] then
+            if not transient then transient = { ws = omniwm.active, prev = lastFrontApp } end
+            return
+        end
+        local t = transient
+        transient = nil
+        lastFrontApp = id
+        if t and t.ws and id == t.prev then
+            -- OmniWM switches a moment after the activation.
+            hs.timer.doAfter(0.4, function()
+                if omniwm.active ~= t.ws then
+                    omniwmCommand({ "command", "switch-workspace", tostring(t.ws) })
+                end
+            end)
+        end
+    end
+end)
+transientWatcher:start()
+
 local function openHere(fn)
     return function()
         if omniwm.active then

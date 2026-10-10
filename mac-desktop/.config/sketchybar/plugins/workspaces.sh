@@ -50,10 +50,12 @@ for n in 1 2 3 4 5 6 7 8 9; do
       icon.shadow.drawing=on label.shadow.drawing=on)
   fi
 
+  # A hidden label still adds its padding, so it is 0 without icons; with
+  # it the active pill of an empty workspace leaned left.
   if [ -n "$icons" ]; then
-    args+=(label="${icons% }" label.drawing=on)
+    args+=(label="${icons% }" label.drawing=on label.padding_right=8)
   else
-    args+=(label="" label.drawing=off)
+    args+=(label="" label.drawing=off label.padding_right=0)
   fi
 done
 
