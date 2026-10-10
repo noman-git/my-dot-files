@@ -40,7 +40,7 @@ brew "rust"
 brew "awscli"
 brew "hashicorp/tap/terraform"
 brew "hashicorp/tap/packer"
-brew "dopplerhq/doppler/doppler"
+cask "dopplerhq/doppler/doppler"
 cask "session-manager-plugin"
 
 # Desktop: tiling, bar, app binds, keys, launcher, wallpaper, system tools.
