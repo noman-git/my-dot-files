@@ -19,7 +19,7 @@ NVIDIA=auto
 DEV_SERVICES=0
 SKIP_AUR=0
 DO_SYSTEM=1
-STOW_PACKAGES=(git zsh tmux tmux-powerline kitty nvim hypr-desktop)
+STOW_PACKAGES=(git zsh tmux tmux-powerline kitty nvim btop fastfetch claude hypr-desktop)
 
 log() { printf '\n== %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -92,11 +92,29 @@ main() {
   log "stow"
   # Pre-create the dirs that other programs write into, so stow links files
   # into them instead of folding the whole dir into the repo.
-  mkdir -p "$HOME/.config/systemd/user" "$HOME/.local/bin" "$HOME/.cache" \
+  # ~/.claude holds Claude Code's history and caches: only settings.json
+  # may be a link.
+  # ~/.tmux holds tpm and its plugins: only fit-windows.sh may be a link.
+  mkdir -p "$HOME/.config/systemd/user" "$HOME/.local/bin" "$HOME/.cache" "$HOME/.claude" "$HOME/.tmux" \
            "$HOME/Pictures/wallpapers/Dynamic-Wallpapers/Dark" \
            "$HOME/Pictures/wallpapers/Dynamic-Wallpapers/Light"
+  # btop and fastfetch moved out of hypr-desktop into their own packages
+  # (2026-10-10). Remove the old links into hypr-desktop, and only those.
+  local old
+  for old in btop fastfetch; do
+    if [ -L "$HOME/.config/$old" ] && [[ "$(readlink "$HOME/.config/$old")" == *hypr-desktop/.config/$old ]]; then
+      rm "$HOME/.config/$old"
+    fi
+  done
   local p
   for p in "${STOW_PACKAGES[@]}"; do
+    # A real ~/.claude/settings.json holds this machine's own Claude settings:
+    # leave it, merge it into claude/.claude/settings.json by hand, then move
+    # it aside and rerun.
+    if [ "$p" = claude ] && [ -f "$HOME/.claude/settings.json" ] && [ ! -L "$HOME/.claude/settings.json" ]; then
+      log "skipping claude: ~/.claude/settings.json is a real file; merge it into claude/.claude/settings.json, move it aside, rerun"
+      continue
+    fi
     if ! stow -R -v "$p"; then
       die "stow $p failed. A real file is in the way; move it aside (do not use --adopt) and rerun."
     fi

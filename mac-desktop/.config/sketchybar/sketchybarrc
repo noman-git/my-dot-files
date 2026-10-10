@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+# SketchyBar: the waybar of the macOS desktop. Workspaces come from OmniWM
+# through `omniwmctl watch`, colours from wallust (see colors.sh).
+
+CONFIG_DIR="$HOME/.config/sketchybar"
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+source "$CONFIG_DIR/colors.sh"
+
+FONT="JetBrainsMono Nerd Font"
+
+# padding_right leaves room for the macOS privacy dot (purple while cava
+# records system audio for the music bars), which macOS draws at the top
+# right above every window.
+# No bar background: the wallpaper or window behind shows through. The
+# active workspace pill and the menus keep the glass style. OmniWM keeps
+# windows under the bar (gaps.outer.top = 38 in settings.toml: 32 + 6).
+sketchybar --bar position=top height=32 color=0x00000000 border_width=0 \
+  corner_radius=0 margin=0 y_offset=0 blur_radius=0 shadow=off \
+  topmost=off sticky=on padding_left=10 padding_right=26 notch_width=200
+
+sketchybar --default updates=when_shown \
+  icon.font="$FONT:Regular:15.0" icon.color="$ICON_COLOR" \
+  label.font="$FONT:SemiBold:13.0" label.color="$LABEL_COLOR" \
+  icon.shadow.drawing=on icon.shadow.color="$TEXT_SHADOW" icon.shadow.distance=1 \
+  label.shadow.drawing=on label.shadow.color="$TEXT_SHADOW" label.shadow.distance=1 \
+  padding_left=3 padding_right=3 \
+  icon.padding_left=6 icon.padding_right=4 \
+  label.padding_left=4 label.padding_right=6
+
+# Music visualizer, the leftmost item. Hammerspoon runs plugins/cava_bar.sh
+# (cava needs the audio permission, and Hammerspoon has a fixed app path for
+# it); the script writes the bars into this label.
+sketchybar --add item cava left \
+  --set cava icon.drawing=off label="▁▁▁▁▁▁▁▁" label.color="$ACCENT_COLOR" \
+    label.font="JetBrainsMono Nerd Font:Regular:14.0" label.padding_left=8
+
+sketchybar --add event omniwm_change
+
+# Workspace number, then the app icons (sketchybar-app-font) in the label.
+# The number sits centred in a fixed 26-point box, so every active pill has
+# the same width and the digit is in the middle (padding around the glyph
+# left the 4 off centre: its glyph rounded to a different width).
+# Both sides of the notch fill outward from it, so 1-5 are added in reverse
+# to read 1 2 3 4 5 | notch | 6 7 8 9.
+for i in 5 4 3 2 1 6 7 8 9; do
+  # 1-5 left of the camera notch (q), 6-9 right of it (e).
+  if [ "$i" -le 5 ]; then pos=q; else pos=e; fi
+  sketchybar --add item "ws.$i" "$pos" \
+    --set "ws.$i" icon="$i" icon.color="$MUTED_COLOR" \
+      icon.padding_left=0 icon.padding_right=0 icon.width=26 icon.align=center \
+      label.font="sketchybar-app-font:Regular:14.0" label.drawing=off \
+      label.padding_left=0 label.padding_right=8 label.y_offset=-1 \
+      background.color="$ACTIVE_COLOR" background.corner_radius=11 \
+      background.height=22 background.drawing=off \
+      click_script="omniwmctl command switch-workspace $i"
+done
+
+sketchybar --add item workspaces left \
+  --set workspaces drawing=off updates=on script="$PLUGIN_DIR/workspaces.sh" \
+  --subscribe workspaces omniwm_change system_woke
+
+# Right side, from the right edge inwards. Wi-Fi, Bluetooth, volume and
+# battery open a menu under the item on click, like Control Center.
+#
+# Menu entries are fixed slots made here, hidden until a script fills them.
+# Removing and adding popup items while a menu is open left an empty,
+# too-large menu box and stopped the menu from closing when the pointer left
+# it, and --move does not reorder popup items.
+SETTINGS="x-apple.systempreferences:com.apple"
+
+# Menus: glassbar draws real glass behind an open menu, so SketchyBar's own
+# menu background stays transparent; it still gives the menu its size.
+sketchybar --default popup.background.color=0x00000000 \
+  popup.background.corner_radius=20 popup.background.border_width=0 \
+  popup.blur_radius=0 popup.background.shadow.drawing=off \
+  popup.align=center popup.y_offset=8
+
+# slots <parent> <prefix> <count>: hidden menu entries prefix.1 .. prefix.count
+slots() {
+  local i
+  for i in $(seq 1 "$3"); do
+    sketchybar --add item "$2.$i" "popup.$1" --set "$2.$i" drawing=off
+  done
+}
+
+sketchybar --add item clock right \
+  --set clock update_freq=10 icon=󰥔 script="$PLUGIN_DIR/clock.sh" \
+    click_script="open -a Calendar"
+
+sketchybar --add item weather right \
+  --set weather update_freq=900 icon=󰖐 script="$PLUGIN_DIR/weather.sh" \
+  --subscribe weather system_woke mouse.clicked mouse.exited.global \
+  --add item weather.now popup.weather --set weather.now icon=󰔏
+slots weather weather.day 3
+sketchybar --set weather.day.1 drawing=on --set weather.day.2 drawing=on --set weather.day.3 drawing=on
+
+# Gap between the time and status capsules. A capsule covers the padding of
+# its own items, so the gap is an empty item outside both.
+sketchybar --add item spacer.time right --set spacer.time width=8 icon.drawing=off label.drawing=off
+
+sketchybar --add item vpn right \
+  --set vpn update_freq=10 updates=on icon=󰦞 label.drawing=off script="$PLUGIN_DIR/vpn.sh" \
+    click_script="open -a NordVPN" \
+  --subscribe vpn wifi_change system_woke
+
+sketchybar --add item notifications right \
+  --set notifications update_freq=10 icon=󰂜 label.drawing=off \
+    script="$PLUGIN_DIR/notifications.sh" \
+  --subscribe notifications front_app_switched system_woke mouse.clicked
+
+sketchybar --add item battery right \
+  --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
+  --subscribe battery system_woke power_source_change mouse.clicked mouse.exited.global \
+  --add item battery.source popup.battery \
+  --set battery.source icon=󰚥 \
+  --add item battery.state popup.battery \
+  --set battery.state icon=󰔟 \
+  --add item battery.settings popup.battery \
+  --set battery.settings icon=󰒓 label="Battery Settings" \
+    click_script="open '$SETTINGS.Battery-Settings.extension'; sketchybar --set battery popup.drawing=off"
+
+sketchybar --add item volume right \
+  --set volume script="$PLUGIN_DIR/volume.sh" label.drawing=off \
+  --subscribe volume volume_change mouse.clicked mouse.exited.global \
+  --add slider volume.slider popup.volume 160 \
+  --set volume.slider script="$PLUGIN_DIR/volume_slider.sh" \
+    slider.highlight_color="$ACCENT_COLOR" slider.background.height=6 \
+    slider.background.corner_radius=3 slider.background.color="$MUTED_COLOR" \
+    slider.knob=󰝥 slider.knob.drawing=on icon=󰕾 \
+  --subscribe volume.slider mouse.clicked \
+  --add item volume.mute popup.volume \
+  --set volume.mute icon=󰝟 label="Mute" click_script="$PLUGIN_DIR/volume.sh mute"
+slots volume volume.out 6
+
+sketchybar --add item bluetooth right \
+  --set bluetooth update_freq=30 script="$PLUGIN_DIR/bluetooth.sh" \
+  --subscribe bluetooth system_woke mouse.clicked mouse.exited.global \
+  --add item bt.toggle popup.bluetooth \
+  --set bt.toggle icon=󰂯 click_script="$PLUGIN_DIR/bluetooth.sh toggle"
+slots bluetooth bt.dev 8
+sketchybar --add item bt.scan popup.bluetooth \
+  --set bt.scan icon=󰂰 label="Search for New Devices" \
+    click_script="$PLUGIN_DIR/bluetooth.sh scan"
+slots bluetooth bt.new 8
+sketchybar --add item bt.settings popup.bluetooth \
+  --set bt.settings icon=󰒓 label="Bluetooth Settings" \
+    click_script="open '$SETTINGS.BluetoothSettings'; sketchybar --set bluetooth popup.drawing=off"
+
+sketchybar --add item wifi right \
+  --set wifi update_freq=30 label.drawing=off script="$PLUGIN_DIR/wifi.sh" \
+  --subscribe wifi wifi_change system_woke mouse.clicked mouse.exited.global \
+  --add item wifi.toggle popup.wifi \
+  --set wifi.toggle icon=󰖩 click_script="$PLUGIN_DIR/wifi.sh toggle"
+slots wifi wifi.net 12
+sketchybar --add item wifi.settings popup.wifi \
+  --set wifi.settings icon=󰒓 label="Wi-Fi Settings" \
+    click_script="open '$SETTINGS.wifi-settings-extension'; sketchybar --set wifi popup.drawing=off"
+
+# Glass capsules, like the Control Center tiles. Each bracket marks one
+# group; glassbar (helpers/glassbar, built by install_mac.sh into
+# ~/.local/bin, run by launchd) draws real macOS glass (NSGlassEffectView)
+# behind each bracket. SketchyBar alone draws only a flat tint, so the brackets stay
+# transparent; they need a background.height to have a size.
+glass() {
+  local name="$1"; shift
+  sketchybar --add bracket "$name" "$@" \
+    --set "$name" background.color=0x00000000 background.border_width=0 \
+      background.height=28
+}
+glass glass.music cava
+glass glass.ws.left ws.1 ws.2 ws.3 ws.4 ws.5
+glass glass.ws.right ws.6 ws.7 ws.8 ws.9
+glass glass.status wifi bluetooth volume battery notifications vpn
+glass glass.time weather clock
+
+# launchd runs glassbar (~/Library/LaunchAgents/com.noman.glassbar.plist,
+# same bracket list); starting it from here failed now and then on a
+# reload. A signal makes it read the new places at once.
+pkill -USR1 -x glassbar 2>/dev/null
+
+# One watcher loop per bar start; see plugins/omniwm_watch.sh.
+pkill -f "sketchybar/plugins/omniwm_watch.sh" 2>/dev/null
+pkill -f "omniwmctl watch active-workspace" 2>/dev/null
+nohup "$PLUGIN_DIR/omniwm_watch.sh" >/dev/null 2>&1 &
+disown
+
+sketchybar --update

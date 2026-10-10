@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Set the wallpaper and recolour cava from it with wallust.
+#
+#   mac-wallpaper <image>   set this image on every display, then recolour
+#   mac-wallpaper           recolour from the last image set with this script
+set -euo pipefail
+
+# Hammerspoon runs this with the plain macOS PATH, which has neither
+# Homebrew (wallust deps), /usr/local/bin (desktoppr) nor cargo (wallust).
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.cargo/bin:$PATH"
+
+STATE="$HOME/.cache/.current_wallpaper"
+WALLUST="$(command -v wallust || echo "$HOME/.cargo/bin/wallust")"
+
+if [ $# -gt 0 ]; then
+  img="$(cd "$(dirname "$1")" && pwd -P)/$(basename "$1")"
+  [ -f "$img" ] || { echo "no such file: $1" >&2; exit 1; }
+  if command -v desktoppr >/dev/null 2>&1; then
+    desktoppr all "$img"
+  else
+    echo "desktoppr is not installed; only the colours change" >&2
+  fi
+  mkdir -p "$(dirname "$STATE")"
+  printf '%s\n' "$img" > "$STATE"
+else
+  [ -f "$STATE" ] || { echo "no wallpaper set yet; pass an image" >&2; exit 1; }
+  img="$(cat "$STATE")"
+fi
+
+# -s: do not send colour codes to open terminals; kitty keeps its own colours.
+"$WALLUST" run -q -s -d "$HOME/.config/wallust" --dynamic-threshold "$img"
+

@@ -46,6 +46,9 @@ install_nerd_font() {
 stow_dotfiles() {
   echo "Stowing dotfiles..."
   # Assumes your dotfiles repo is organized in subdirectories (e.g., git, zsh, kitty, tmux-powerline)
+  # ~/.tmux holds tpm and its plugins: create it so stow links only
+  # fit-windows.sh into it instead of the whole dir.
+  mkdir -p "$HOME/.tmux"
   stow git
   stow zsh
   stow tmux

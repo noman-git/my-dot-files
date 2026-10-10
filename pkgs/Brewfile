@@ -1,0 +1,67 @@
+# macOS packages. install_mac.sh runs `brew bundle --file pkgs/Brewfile`.
+# `brew bundle check --file pkgs/Brewfile` lists what is missing.
+
+tap "hashicorp/tap"
+tap "dopplerhq/doppler"
+tap "felixkratz/formulae"
+tap "smudge/smudge"
+
+# Shell and terminal tools
+brew "stow"
+brew "neovim"
+brew "tmux"
+brew "fzf"
+brew "ripgrep"
+brew "bat"
+brew "zoxide"
+brew "lsd"
+brew "jq"
+brew "gh"
+brew "gnupg"
+brew "imagemagick"
+brew "tree-sitter-cli"
+brew "luarocks"
+brew "btop"
+brew "fastfetch"
+brew "yazi"
+
+# Languages
+brew "pyenv"
+brew "tcl-tk"
+brew "zlib"
+brew "openssl@4"
+brew "nvm"
+brew "node"
+brew "yarn"
+brew "go"
+brew "rust"
+
+# Cloud and infra
+brew "awscli"
+brew "hashicorp/tap/terraform"
+brew "hashicorp/tap/packer"
+cask "dopplerhq/doppler/doppler"
+cask "session-manager-plugin"
+
+# Desktop: tiling, bar, app binds, keys, launcher, wallpaper, system tools.
+# wallust is not in Homebrew; install_mac.sh runs `cargo install wallust`.
+cask "omniwm"
+brew "felixkratz/formulae/sketchybar"
+cask "hammerspoon"
+cask "karabiner-elements"
+cask "raycast"
+cask "desktoppr"
+brew "blueutil"
+brew "switchaudio-osx"
+brew "smudge/smudge/nightlight"
+brew "mpv"
+brew "yt-dlp"
+
+# Apps
+cask "kitty"
+cask "font-jetbrains-mono-nerd-font"
+cask "font-sketchybar-app-font"
+cask "linearmouse"
+cask "dbeaver-community"
+cask "doppler-app"
+cask "xnviewmp"

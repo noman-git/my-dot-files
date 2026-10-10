@@ -1,0 +1,12 @@
+# wallust config for macOS. mac-wallpaper runs `wallust run -s -d ~/.config/wallust`
+# because wallust on macOS reads ~/Library/Application Support by default.
+# Same palette settings as hypr-desktop/.config/wallust/wallust.toml.
+
+backend = "kmeans"
+color_space = "labmixed"
+palette = "dark16"
+threshold = 11
+
+[templates]
+cava.template = 'colors-cava'
+cava.target = '~/.config/cava/config'

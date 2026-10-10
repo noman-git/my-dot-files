@@ -5,6 +5,10 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 
+# Homebrew on macOS (login shells get this from ~/.zprofile; tmux panes may not)
+[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv zsh)"
+export PATH="$HOME/.local/bin:$PATH"
+
 # Zinit Setup
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
@@ -27,6 +31,9 @@ zinit light Aloxaf/fzf-tab
 
 zinit snippet OMZP::command-not-found
 zinit snippet OMZP::sudo
+
+# Docker Desktop CLI completions; must be on fpath before compinit
+[[ -d "$HOME/.docker/completions" ]] && fpath=("$HOME/.docker/completions" $fpath)
 
 autoload -Uz compinit && compinit
 
@@ -102,9 +109,10 @@ alias tmwt='tmux last-window'
 alias tmwn='tmux next-window'
 alias tmwp='tmux previous-window'
 
-alias gnome-tweaks='/usr/bin/python /usr/bin/gnome-tweaks'
-
-alias open='xdg-open'
+if [[ "$OSTYPE" == linux* ]]; then
+  alias gnome-tweaks='/usr/bin/python /usr/bin/gnome-tweaks'
+  alias open='xdg-open'
+fi
 
 # Shell integrations
 eval "$(fzf --zsh)"
@@ -135,3 +143,24 @@ eval "$(zoxide init --cmd cd zsh)"
 # Use Neovim as the editor (e.g. for `/plan open` in Claude Code)
 export EDITOR=nvim
 export VISUAL=nvim
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# cargo install (wallust)
+[[ -d "$HOME/.cargo/bin" ]] && export PATH="$HOME/.cargo/bin:$PATH"
+
+# Docker Desktop CLI
+[[ -d "$HOME/.docker/bin" ]] && export PATH="$HOME/.docker/bin:$PATH"
+
+# pnpm
+if [[ "$OSTYPE" == darwin* ]]; then
+  export PNPM_HOME="$HOME/Library/pnpm"
+else
+  export PNPM_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/pnpm"
+fi
+case ":$PATH:" in
+  ":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac

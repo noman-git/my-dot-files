@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  glassbar: real Liquid Glass behind the SketchyBar capsules
+  (mac-desktop/.config/sketchybar/helpers/glassbar). launchd starts it at
+  login and restarts it if it stops; the arguments are the SketchyBar
+  brackets in sketchybarrc. install_mac.sh builds the binary and loads this.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.noman.glassbar</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>exec "$HOME/.local/bin/glassbar" glass.music glass.ws.left glass.ws.right glass.status glass.time</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>5</integer>
+  <key>StandardErrorPath</key>
+  <string>/tmp/glassbar.err</string>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+</dict>
+</plist>
