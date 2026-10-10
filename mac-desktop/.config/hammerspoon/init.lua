@@ -21,7 +21,12 @@ local function bind(mods, key, desc, fn)
     hs.hotkey.bind(mods, key, desc, nil, fn)
 end
 
-bind(mainMod, "return", "terminal", sh("open -na kitty"))
+-- One kitty process for every window, so OmniWM sees one app. `open -na`
+-- started a new kitty process each time.
+bind(mainMod, "return", "terminal", function()
+    hs.task.new("/Applications/kitty.app/Contents/MacOS/kitty",
+        nil, { "--single-instance", "--directory", os.getenv("HOME") }):start()
+end)
 bind(mainMod, "e", "file manager", sh("open ~"))
 bind(mainMod, "b", "default browser", function()
     local id = hs.urlevent.getDefaultHandler("https")
