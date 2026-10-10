@@ -66,6 +66,11 @@ sketchybar --add item clock right \
   --set clock update_freq=10 icon=󰥔 script="$PLUGIN_DIR/clock.sh" \
     click_script="open -a Calendar"
 
+sketchybar --add item notifications right \
+  --set notifications update_freq=10 icon=󰂜 label.drawing=off \
+    script="$PLUGIN_DIR/notifications.sh" \
+  --subscribe notifications front_app_switched system_woke mouse.clicked
+
 sketchybar --add item battery right \
   --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
   --subscribe battery system_woke power_source_change mouse.clicked mouse.exited.global \

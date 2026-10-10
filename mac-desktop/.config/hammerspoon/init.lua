@@ -196,3 +196,10 @@ local function requestLocation()
 end
 hs.urlevent.bind("location-request", requestLocation)
 if hs.location.authorizationStatus() == "undetermined" then requestLocation() end
+
+-- hammerspoon://notification-center opens the Notification Center for the
+-- bar. It sends Hyper+N, the "Show Notification Center" shortcut that
+-- install_mac.sh turns on (symbolic hotkey 163; macOS has no command for it).
+hs.urlevent.bind("notification-center", function()
+    hs.eventtap.keyStroke(hyper, "n", 0)
+end)

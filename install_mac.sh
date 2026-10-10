@@ -82,6 +82,11 @@ set_defaults() {
   defaults write com.apple.WindowManager EnableTopTilingByEdgeDrag -bool false
   # Hide the menu bar; SketchyBar takes its place. Apps pick this up on relaunch.
   defaults write NSGlobalDomain _HIHideMenuBar -bool true
+  # Show Notification Center on Hyper+N (symbolic hotkey 163, off by default).
+  # The bar's bell sends it through Hammerspoon; macOS has no command for it.
+  defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 163 \
+    '<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>110</integer><integer>45</integer><integer>1966080</integer></array><key>type</key><string>standard</string></dict></dict>'
+  /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u || true
   killall Dock 2>/dev/null || true
 }
 

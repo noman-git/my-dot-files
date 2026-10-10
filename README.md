@@ -230,7 +230,14 @@ bind focuses the app, or opens it if it is not running. The list is `apps` in
 SketchyBar is translucent (`BAR_COLOR` alpha `0x40` plus blur) and shows all
 9 OmniWM workspaces with an icon for each app on them and the front app. On
 the right: Wi-Fi, Bluetooth (connected devices, through `blueutil`), volume,
-battery and the clock. Wi-Fi, Bluetooth, volume and
+a bell, battery and the clock. The bell shows the sum of the Dock badges of
+running apps (`lsappinfo`) and opens the Notification Center on click: it
+asks Hammerspoon to press `Hyper+N`, the "Show Notification Center" shortcut
+that `install_mac.sh` turns on. The status icons of background apps
+(NordVPN, Docker and others) stay in the hidden macOS menu bar; move the
+pointer to the top edge to show it. On macOS 27 SketchyBar cannot copy them
+(Screen Recording and SketchyBar issue #849), and a click on them from the
+bar opens their menu off screen. Wi-Fi, Bluetooth, volume and
 battery open a menu under the item. The Wi-Fi menu lists the networks
 around; Hammerspoon fills it (`hammerspoon://wifi-menu`) because network
 names need Location access, which only an app can get. Without it, the menu
