@@ -163,35 +163,51 @@ Tested on an M4 Pro with macOS 27.0.1 (2026-10-10).
 4. `cd ~/my-dot-files && ./install_mac.sh`
    Flags: `--no-brew` skips Homebrew and the Brewfile, `--no-defaults` skips
    the `defaults write` settings (Dock autohide, key repeat, no Spaces
-   reordering, no drag-to-edge tiling).
-5. Give OmniWM Accessibility and Input Monitoring, and Hammerspoon
-   Accessibility, in System Settings > Privacy & Security. Allow the
-   Karabiner driver extension and Input Monitoring when Karabiner asks. OmniWM does not
-   need Screen Recording; without it, Overview and workspace swipes show no
-   window thumbnails.
-6. In Raycast, set the hotkey to `Cmd+Space` and turn off the Spotlight
+   reordering, no drag-to-edge tiling, hidden menu bar, the Notification
+   Center shortcut).
+5. Permissions, in System Settings > Privacy & Security:
+   - OmniWM: Accessibility, Input Monitoring and Screen Recording. Screen
+     Recording is optional, but without it OmniWM shows its permission
+     window at every login and Overview has no window thumbnails.
+   - Hammerspoon: Accessibility and Location Services (Wi-Fi network names,
+     weather place). Deny its Screen Recording request; nothing here needs it.
+   - Karabiner: allow the driver extension and Input Monitoring when it asks.
+6. System Settings > General > Login Items: add OmniWM and Hammerspoon under
+   Open at Login. SketchyBar starts as a `brew services` agent and Karabiner
+   adds its own login items.
+7. In Raycast, set the hotkey to `Cmd+Space` and turn off the Spotlight
    shortcut in System Settings > Keyboard > Keyboard Shortcuts > Spotlight.
    `Option+D` sends `Cmd+Space`, so it opens whichever launcher has that key.
+8. Lock when the display sleeps, the same 10 minutes as hypridle on Arch:
+   `sysadminctl -screenLock immediate -password -` and
+   `sudo pmset -b displaysleep 10` (on power it is 10 already).
+9. Log out and in once, so every app picks up the hidden menu bar.
 
 What replaces what:
 
-| Hyprland desktop          | macOS                                              |
+| Arch                      | macOS                                              |
 | ------------------------- | -------------------------------------------------- |
 | Hyprland (dwindle)        | OmniWM, Dwindle layout by default                  |
 | exec binds                | Hammerspoon (`mac-desktop/.config/hammerspoon`)    |
-| rofi                      | Raycast                                            |
-| cliphist                  | Spotlight clipboard (`Cmd+4`)                      |
+| rofi                      | Raycast, plus Hammerspoon choosers for wallpapers, effects, music, search, key hints and the power menu |
+| cliphist                  | Spotlight clipboard (`Cmd+4`) or Raycast           |
 | waybar                    | SketchyBar; the macOS menu bar is hidden           |
+| swaync                    | the bell in SketchyBar and the Notification Center |
 | wallust + swww            | `mac-wallpaper <image>` (desktoppr, then wallust for the bar) |
 | xremap                    | Karabiner: Caps Lock tap is Escape, hold is Hyper  |
-| SUPER+SHIFT+Return drop-down | OmniWM Quake terminal (Ghostty)                 |
+| drop-down terminal        | OmniWM Quake terminal (Ghostty)                    |
 | grim, slurp, swappy       | `Cmd+Shift+5` toolbar                              |
-| hyprlock, hyprsunset      | lock screen, Night Shift                           |
+| hyprlock, hypridle        | macOS lock screen and display sleep (step 8)       |
+| hyprsunset                | Night Shift through `nightlight`                   |
+| wlogout                   | power menu (`Ctrl+Option+P`)                       |
+| RofiBeats                 | music menu (`Option+Shift+M`), mpv and yt-dlp      |
+| sticky                    | Stickies                                           |
 | nwg-displays              | System Settings > Displays; macOS saves the layout for each set of connected displays |
 
 mainMod is `Option`, the key in the SUPER position on a Mac keyboard, so the
-binds sit where the Hyprland binds sit. `Command` stays free for app
-shortcuts. Window binds are in OmniWM; app binds are in Hammerspoon.
+binds sit where the Hyprland binds sit. `ALT` binds on Arch use `Command`
+here. Window binds are in OmniWM; app binds are in Hammerspoon. `Option+H`
+lists every bind, including all OmniWM binds read from its `settings.toml`.
 
 | Bind                          | Action                                 |
 | ----------------------------- | -------------------------------------- |
@@ -200,41 +216,48 @@ shortcuts. Window binds are in OmniWM; app binds are in Hammerspoon.
 | `Option+E`                    | Finder                                 |
 | `Option+B`                    | default browser                        |
 | `Option+Q`                    | close window                           |
+| `Option+Shift+Q`              | quit the active app                    |
 | `Option+Space`                | float or tile window                   |
 | `Option+Shift+F`              | fullscreen                             |
 | `Option+A`                    | Overview                               |
 | `Option+Shift+Return`         | drop-down terminal                     |
 | `Option+arrows`               | focus                                  |
-| `Control+Option+arrows`       | move window                            |
+| `Ctrl+Option+arrows`          | move window; in Dwindle, toward a neighbour it joins that tile as a tab, on a tab it takes the tab out |
 | `Option+Shift+arrows`         | resize                                 |
 | `Option+1..9`                 | workspace                              |
-| `Option+Shift+1..9`           | move window to workspace               |
+| `Option+Shift+1..9`           | move window to workspace and follow it |
 | `Option+Tab`, `Option+Shift+Tab` | next, previous workspace            |
 | `Option+U`, `Option+Shift+U`  | scratchpad (special workspace)         |
 | `Option+G`                    | tab group (scrolling layout only)      |
-| `Ctrl+Option+arrows` in Dwindle | move the window; toward a neighbour it joins that tile as a tab, on a tab it takes the tab out |
-| `Ctrl+Option+[`, `Ctrl+Option+]` | move the workspace to the monitor on the left, right |
-| `Option+Shift+Q`              | quit the active app                    |
-| `Option+N`                    | Night Shift on or off (`nightlight`)   |
-| `Option+Shift+D`              | dark or light mode                     |
 | `Option+Shift+I`              | toggle split                           |
-| `Option+Command+L`            | dwindle or scrolling layout            |
-| `Option+Shift+S`              | screenshot toolbar                     |
-| `Control+Option+L`            | lock screen                            |
-| `Control+Option+Space`        | OmniWM command palette                 |
-| `Caps Lock` (tap)             | Escape                                 |
+| `Option+Cmd+L`                | Dwindle or scrolling layout            |
+| `Ctrl+Option+[`, `Ctrl+Option+]` | move the workspace to the monitor on the left, right |
+| `Ctrl+Option+Space`           | OmniWM command palette                 |
 | `Option+H`, `Option+Shift+K`  | key hints: search all binds            |
 | `Ctrl+Option+P`               | power menu: lock, sleep, log out, restart, shut down |
-| `Option+W`                    | wallpaper picker (`~/Pictures/wallpapers`) |
-| `Control+Option+W`            | random wallpaper                       |
+| `Ctrl+Option+L`               | lock screen                            |
+| `Option+N`                    | Night Shift on or off                  |
+| `Option+Shift+D`              | dark or light mode                     |
+| `Option+Shift+S`              | screenshot toolbar                     |
+| `Option+W`                    | wallpaper picker; its first row switches the 30-minute shuffle |
+| `Option+Shift+W`              | wallpaper effects                      |
+| `Ctrl+Option+W`               | random wallpaper                       |
+| `Option+Shift+M`              | music: online stations and ~/Music     |
 | `Option+S`                    | web search (Google)                    |
 | `Option+Cmd+E`                | emoji (Raycast)                        |
 | `Option+Cmd+V`                | clipboard history (Raycast)            |
 | `Option+Cmd+C`                | calculator (Raycast root search)       |
-| `Control+Option+S`            | window switcher (Raycast)              |
+| `Ctrl+Option+S`               | window switcher (Raycast)              |
+| `Option+Cmd+N`, `Option+Cmd+Shift+N` | show or hide sticky notes, new note |
+| `Caps Lock` (tap)             | Escape                                 |
+| `Hyper+N`                     | Notification Center                    |
 | `Hyper+T/B/C/S/D/M/F`         | kitty, Zen, Chrome, Slack, DBeaver, MongoDB Compass, Finder |
 
-Every other OmniWM bind is listed in `settings.toml` under `[[hotkeys]]`.
+Hyper is `Caps Lock` held (Karabiner sends Ctrl+Option+Shift+Cmd). A Hyper
+bind focuses the app, or opens it if it is not running. The list is `apps` in
+`hammerspoon/init.lua`. Hammerspoon opens apps only after every modifier is
+up, because Zen, like Firefox, opens Troubleshoot Mode when Option or Shift
+is down at launch.
 
 The Raycast binds are in Hammerspoon, not in Raycast: Raycast keeps its own
 hotkeys in an encrypted database, so they cannot be in git. Hammerspoon opens
@@ -242,56 +265,70 @@ the Raycast commands by deeplink. If a link stops working, select the
 command in Raycast, press `Cmd+Shift+C` (Copy Deeplink) and put the new link
 in `hammerspoon/init.lua`.
 
-The wallpaper picker lists the JPG, PNG and WebP files under
-`~/Pictures/wallpapers` (not in git, the same path as on Arch), with
-thumbnails cached in `~/.cache/wallpaper-thumbs`. A pick runs
-`mac-wallpaper`.
+### Bar
 
-Hyper is `Caps Lock` held (Karabiner sends Ctrl+Option+Shift+Cmd). A Hyper
-bind focuses the app, or opens it if it is not running. The list is `apps` in
-`hammerspoon/init.lua`.
-
-### Bar and colours
-
-SketchyBar is translucent (`BAR_COLOR` alpha `0x40` plus blur) and shows all
-9 OmniWM workspaces with an icon for each app on them and the front app. On
-the right: Wi-Fi, Bluetooth (connected devices, through `blueutil`), volume,
-battery, a bell, a VPN icon, the weather and the clock. The VPN icon is on
-when the default route goes through a `utun` interface; NordVPN for macOS
-has no command-line tool, so a click opens the app. The weather comes from
-wttr.in for the place in `~/.cache/location`, which Hammerspoon writes every
-hour from Location Services (the IP address would give the VPN server's
-city); a click shows the 3-day forecast. The bell shows the sum of the Dock badges of
-running apps (`lsappinfo`) and opens the Notification Center on click: it
-asks Hammerspoon to press `Hyper+N`, the "Show Notification Center" shortcut
-that `install_mac.sh` turns on. The status icons of background apps
-(NordVPN, Docker and others) stay in the hidden macOS menu bar; move the
-pointer to the top edge to show it. On macOS 27 SketchyBar cannot copy them
-(Screen Recording and SketchyBar issue #849), and a click on them from the
-bar opens their menu off screen. Wi-Fi, Bluetooth, volume and
-battery open a menu under the item. The Wi-Fi menu lists the networks
-around; Hammerspoon fills it (`hammerspoon://wifi-menu`) because network
-names need Location access, which only an app can get. Without it, the menu
-lists the saved networks. A saved network joins without a password; a new
-one asks for it. The Bluetooth menu connects paired devices and searches for
-and pairs new ones. The app icons come from `font-sketchybar-app-font`;
+SketchyBar is translucent (`BAR_COLOR` alpha `0x40` plus blur). On the left
+it shows all 9 OmniWM workspaces with an icon for each app on them, and the
+front app. `sketchybarrc` starts `plugins/omniwm_watch.sh`, which runs
+`omniwmctl watch` in a loop and sends `omniwm_change` to the bar; this needs
+`ipcEnabled = true` in the OmniWM settings. OmniWM's own workspace bar is
+off, and `gaps.outer.top = 37` keeps windows 4 points under the 33-point
+bar. The app icons come from `font-sketchybar-app-font`;
 `plugins/icon_map.sh` is the app name to icon map from the same release
 (v3.0.5). Download the new `icon_map.sh` from
 https://github.com/kvndrsslr/sketchybar-app-font/releases when you update
-the font, or new apps show no icon. `sketchybarrc` starts one
-`omniwmctl watch` process that sends `omniwm_change` to the bar; this needs
-`ipcEnabled = true` in the OmniWM settings. OmniWM's own workspace bar is off,
-and `gaps.outer.top = 37` keeps windows 4 points under the 33-point bar.
+the font, or new apps show no icon.
+
+On the right, from the right edge: clock, weather, VPN, bell, battery,
+volume, Bluetooth, Wi-Fi.
+
+- Wi-Fi, Bluetooth, volume and battery open a menu under the item. Menu
+  entries are fixed slots that `sketchybarrc` makes and the scripts fill;
+  removing and adding popup items while a menu was open left an empty menu
+  that did not close.
+- Wi-Fi lists the networks around. Hammerspoon fills the menu
+  (`hammerspoon://wifi-menu`), because network names need Location access,
+  which only an app can get. Without it, the menu lists the saved networks.
+  A saved network joins without a password; a new one asks for it.
+- Bluetooth connects paired devices, and searches for and pairs new ones
+  (`blueutil`). Volume has a slider, mute and the outputs (`switchaudio-osx`).
+- The bell shows the sum of the Dock badges of running apps (`lsappinfo`).
+  A click asks Hammerspoon to press `Hyper+N`, the "Show Notification
+  Center" shortcut that `install_mac.sh` turns on.
+- The VPN icon is on when the default route goes through a `utun`
+  interface. NordVPN for macOS has no command-line tool, so a click opens
+  the app.
+- The weather comes from wttr.in for the place in `~/.cache/location`,
+  which Hammerspoon writes every hour from Location Services. The IP
+  address would give the VPN server's city. A click shows 3 days.
+
+The status icons of background apps (NordVPN, Docker and others) stay in the
+hidden macOS menu bar; move the pointer to the top edge to show it. On
+macOS 27 SketchyBar cannot copy them (Screen Recording and SketchyBar issue
+#849), and pressing them through Accessibility opens their menu off screen.
+
+### Wallpaper and colours
 
 `mac-wallpaper <image>` sets the wallpaper on every display and runs
-`wallust run -d ~/.config/wallust`. wallust on macOS reads
+`wallust run -s -d ~/.config/wallust`. wallust on macOS reads
 `~/Library/Application Support` by default, hence `-d`. It writes
 `~/.config/sketchybar/wallust-colors.sh` (not in git), then reloads
-SketchyBar. kitty keeps its own colours: the wallust palette from a dark
-wallpaper made typed text and the tmux-powerline segments hard to read
-(2026-10-10). `mac-wallpaper` with no image recolours from the last
-image. The image path is in `~/.cache/.current_wallpaper`. The OmniWM border
-colour is fixed in `settings.toml`; wallust does not change it.
+SketchyBar. `mac-wallpaper` with no image recolours from the last image;
+the path is in `~/.cache/.current_wallpaper`.
+
+kitty keeps its own colours. `-s` stops wallust from sending colour codes to
+open terminals: without it every wallpaper change turned kitty's green and
+background into dark wallpaper colours, and tmux saved them for each pane.
+To clean panes that got them, send `\033]104\007\033]110\007\033]111\007`
+to each `#{pane_tty}`, or open new panes.
+
+The picker (`Option+W`) lists the JPG, PNG and WebP files under
+`~/Pictures/wallpapers` (not in git, the same path as on Arch), with
+thumbnails in `~/.cache/wallpaper-thumbs`. Effects (`Option+Shift+W`) use
+ImageMagick on the original of the current wallpaper. The shuffle sets a
+random wallpaper every 30 minutes; `hs.settings` keeps it on across
+restarts. The OmniWM border colour is fixed in `settings.toml`; wallust does
+not change it.
 
 ### Editing the OmniWM config
 
@@ -307,6 +344,20 @@ order and drops comments, so the file has no comments.
 After an OmniWM upgrade that adds a key or a hotkey, OmniWM rewrites the file
 and keeps a copy as `settings.toml.pre-v4` (or the next version) next to it.
 Commit the rewritten file.
+
+### Known problems (2026-10-10)
+
+- Zen starts without its extensions and its compact mode shortcut until
+  you click in it once. It happens with every way of opening Zen.
+- YouTube links in the music menu can fail with HTTP 429; yt-dlp is
+  rate-limited. The radio streams play.
+- tmux keeps running through a logout. Its server and everything in it stay
+  in the old login session, where `lsappinfo` sees no apps. Save with
+  prefix + Ctrl-s and run `tmux kill-server` after a login.
+- Claude Code's image paste (`Ctrl+V`) can stop working in a long session;
+  restarting Claude fixes it.
+- The Raycast deeplinks come from community documentation, not from
+  Raycast's own list. See above if one stops working.
 
 ## Daily use
 
