@@ -14,6 +14,7 @@ directory of the repo, so that path puts everything under `$HOME`.
 
 ```
 git/ zsh/ tmux/ tmux-powerline/ kitty/   stow packages, target is $HOME
+claude/               ~/.claude/settings.json (hooks) and ~/.local/bin/claude-notify
 btop/ fastfetch/      stow packages, shared by Arch and macOS
 nvim/                 stow package; ~/.config/nvim is the my-nvim-config submodule
 hypr-desktop/         stow package for the whole desktop:
@@ -32,7 +33,7 @@ mac-desktop/          stow package for the macOS desktop:
                         ~/.config/{omniwm/settings.toml,hammerspoon/init.lua,
                                    sketchybar,wallust,karabiner}
                         ~/.local/bin/mac-wallpaper
-                        ~/Library/LaunchAgents/com.noman.glassbar.plist
+                        ~/Library/LaunchAgents/com.noman.{glassbar,login-apps}.plist
 pkgs/Brewfile         macOS packages for brew bundle
 install_mac.sh        full macOS setup
 install_ubuntu.sh     shell-only setup for Ubuntu machines
@@ -249,6 +250,9 @@ lists every bind, including all OmniWM binds read from its `settings.toml`.
 | `Option+Shift+W`              | wallpaper effects                      |
 | `Ctrl+Option+W`               | random wallpaper                       |
 | `Option+Shift+M`              | music: online stations and ~/Music     |
+| `Ctrl+Option+Cmd+B`           | show or hide the bar (and its glass)   |
+| `Option+Cmd+R`                | reload the bar, glassbar and Hammerspoon |
+| `Option+Cmd+U`                | `brew update && brew upgrade` in a new kitty window |
 | `Option+S`                    | web search (Google)                    |
 | `Option+Cmd+E`                | emoji (Raycast)                        |
 | `Option+Cmd+V`                | clipboard history (Raycast)            |
@@ -423,19 +427,23 @@ Commit the rewritten file.
 
 ### Claude Code notifications
 
-`~/.claude/settings.json` (not in this repo) runs `~/.local/bin/claude-notify`
-on the `Notification` and `Stop` hook events, asynchronously. The script
-reads the hook JSON and asks Hammerspoon (`hammerspoon://claude-notify`) to
-show a macOS notification titled "Claude Code · <project>": the question
-or permission text with a sound, or "Finished" without one. A click brings
-kitty to the front. On a new Mac add the hooks again:
+The `claude` package stows `~/.claude/settings.json` and
+`~/.local/bin/claude-notify` on both machines. The settings run
+`claude-notify` on the `Notification` and `Stop` hook events,
+asynchronously. It reads the hook JSON and shows "Claude Code · <project>":
+the question or permission text, or "Finished". macOS: through Hammerspoon
+(`hammerspoon://claude-notify`), with a sound for questions; a click brings
+kitty to the front. Linux: `notify-send`, critical for questions. The
+installers create `~/.claude` before stow, so only `settings.json` is a link
+and Claude Code's history and caches stay out of git. If Claude Code ever
+replaces the link with a plain file (for example after `/config`), copy the
+change into `claude/.claude/settings.json` and run `stow -R claude`.
 
-```json
-"hooks": {
-  "Notification": [{"hooks": [{"type": "command", "command": "/Users/<you>/.local/bin/claude-notify", "async": true, "timeout": 10}]}],
-  "Stop": [{"hooks": [{"type": "command", "command": "/Users/<you>/.local/bin/claude-notify", "async": true, "timeout": 10}]}]
-}
-```
+### Login apps
+
+`com.noman.login-apps` (launchd, stowed) starts Slack and Stickies in the
+background at login: Slack sends no notifications while it is closed, and
+Stickies is the `sticky --autostart` of Arch.
 
 ### Known problems (2026-10-10)
 

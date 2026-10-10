@@ -685,6 +685,26 @@ end
 bind(mainMod, "`", "next window on this workspace", function() cycleWindows(1) end)
 bind({ "alt", "shift" }, "`", "previous window on this workspace", function() cycleWindows(-1) end)
 
+-- Bar and desktop helpers, like the waybar binds on Arch.
+local SKETCHYBAR_BIN = "/opt/homebrew/bin/sketchybar"
+-- Ctrl+Option+Cmd+B: show or hide the bar (SUPER+CTRL+ALT+B). glassbar
+-- hides its glass with it.
+bind({ "ctrl", "alt", "cmd" }, "b", "show or hide the bar", function()
+    hs.execute(SKETCHYBAR_BIN .. " --bar hidden=toggle; /usr/bin/pkill -USR1 -x glassbar")
+end)
+-- Option+Cmd+R: reload the bar, glassbar and Hammerspoon (SUPER+ALT+R).
+bind({ "alt", "cmd" }, "r", "reload bar, glass and Hammerspoon", function()
+    hs.execute(SKETCHYBAR_BIN .. " --reload")
+    hs.execute("/bin/launchctl kickstart -k gui/" .. hs.execute("/usr/bin/id -u"):gsub("%s+", "") .. "/com.noman.glassbar")
+    hs.timer.doAfter(1, hs.reload)
+end)
+-- Option+Cmd+U: package update in a new kitty window, like Distro_update.sh.
+-- The window stays open (--hold) so the output can be read.
+bind({ "alt", "cmd" }, "u", "update packages (brew)", openHere(function()
+    launch({ "-n", "-a", "kitty", "--args", "--single-instance", "--hold",
+        "/bin/zsh", "-lic", "brew update && brew upgrade" })
+end))
+
 -- Power menu, like wlogout on Arch (Ctrl+Option+P). Log out, restart and
 -- shut down ask first.
 local function confirmed(action)

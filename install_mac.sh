@@ -18,7 +18,7 @@ cd "$REPO"
 
 DO_BREW=1
 DO_DEFAULTS=1
-STOW_PACKAGES=(git zsh tmux tmux-powerline kitty nvim btop fastfetch mac-desktop)
+STOW_PACKAGES=(git zsh tmux tmux-powerline kitty nvim btop fastfetch claude mac-desktop)
 
 log() { printf '\n== %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -55,7 +55,9 @@ stow_packages() {
   # whole dir. Programs then write their own state next to the links.
   # ~/.config/karabiner is left out on purpose: Karabiner replaces
   # karabiner.json on save, which breaks a file link, so stow links the dir.
-  mkdir -p "$HOME/Library/LaunchAgents"
+  # ~/.claude holds Claude Code's history and caches: only settings.json
+  # may be a link.
+  mkdir -p "$HOME/Library/LaunchAgents" "$HOME/.claude"
   mkdir -p "$HOME/.config/omniwm" "$HOME/.config/hammerspoon" "$HOME/.config/kitty" \
     "$HOME/.config/sketchybar" "$HOME/.config/wallust" "$HOME/.config/cava" "$HOME/.local/bin"
   local p
@@ -116,6 +118,9 @@ start_apps() {
   brew services start sketchybar || true
   open -a Hammerspoon || true
   open -a Karabiner-Elements || true
+  # Slack and Stickies at login (stowed ~/Library/LaunchAgents/com.noman.login-apps.plist).
+  launchctl bootout "gui/$(id -u)/com.noman.login-apps" 2>/dev/null || true
+  launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.noman.login-apps.plist" || true
 }
 
 main() {

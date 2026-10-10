@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Apps to start at login, in the background: Slack (it sends no
+  notifications while closed) and Stickies (like `sticky --autostart` on
+  Arch). launchd runs this once per login; install_mac.sh loads it.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.noman.login-apps</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>/usr/bin/open -g -a Slack; /usr/bin/open -g -a Stickies</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>

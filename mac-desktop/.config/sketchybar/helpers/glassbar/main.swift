@@ -132,11 +132,31 @@ func refreshMenus() {
     }
 }
 
+// The bar can be hidden (Ctrl+Option+Cmd+B); its glass hides with it.
+func barHidden() -> Bool {
+    let task = Process()
+    task.executableURL = URL(fileURLWithPath: sketchybar)
+    task.arguments = ["--query", "bar"]
+    let pipe = Pipe()
+    task.standardOutput = pipe
+    task.standardError = FileHandle.nullDevice
+    do { try task.run() } catch { return false }
+    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+    task.waitUntilExit()
+    let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+    return (json?["hidden"] as? String) == "on"
+}
+
 func refresh() {
     // SketchyBar reports top-left screen coordinates; AppKit counts from the
     // bottom-left of the main screen.
     guard let mainHeight = NSScreen.screens.first?.frame.height else { return }
     var seen = Set<String>()
+    if barHidden() {
+        for (_, panel) in panels { panel.orderOut(nil) }
+        panels.removeAll()
+        return
+    }
     for name in brackets {
         for (display, r) in query(name) {
             let key = name + "|" + display

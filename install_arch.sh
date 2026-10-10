@@ -19,7 +19,7 @@ NVIDIA=auto
 DEV_SERVICES=0
 SKIP_AUR=0
 DO_SYSTEM=1
-STOW_PACKAGES=(git zsh tmux tmux-powerline kitty nvim btop fastfetch hypr-desktop)
+STOW_PACKAGES=(git zsh tmux tmux-powerline kitty nvim btop fastfetch claude hypr-desktop)
 
 log() { printf '\n== %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
@@ -92,7 +92,9 @@ main() {
   log "stow"
   # Pre-create the dirs that other programs write into, so stow links files
   # into them instead of folding the whole dir into the repo.
-  mkdir -p "$HOME/.config/systemd/user" "$HOME/.local/bin" "$HOME/.cache" \
+  # ~/.claude holds Claude Code's history and caches: only settings.json
+  # may be a link.
+  mkdir -p "$HOME/.config/systemd/user" "$HOME/.local/bin" "$HOME/.cache" "$HOME/.claude" \
            "$HOME/Pictures/wallpapers/Dynamic-Wallpapers/Dark" \
            "$HOME/Pictures/wallpapers/Dynamic-Wallpapers/Light"
   local p
