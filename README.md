@@ -340,7 +340,15 @@ to each `#{pane_tty}`, or open new panes.
 wallust also writes `~/.config/cava/config` from
 `templates/colors-cava`: the Arch gradient, with `method = coreaudio` and
 `source = tap`, which reads the system output without a loopback device
-(macOS 14.2 and later). macOS asks once to let the terminal record audio.
+(macOS 14.2 and later). kitty 0.49 does not declare
+`NSAudioCaptureUsageDescription`, so macOS never shows a dialog for it: add
+`/Applications/kitty.app` by hand under System Settings > Privacy & Security
+> Screen & System Audio Recording > **System Audio Recording Only** (the
+lower list; the upper one is full screen recording and does not count).
+For cava in the drop-down, add
+`/Applications/kitty.app/Contents/kitty-quick-access.app` too. Inside tmux
+the check goes to the tmux server, so run cava in a kitty window without
+tmux.
 
 The picker (`Option+W`) lists the JPG, PNG and WebP files under
 `~/Pictures/wallpapers` (not in git, the same path as on Arch), with
