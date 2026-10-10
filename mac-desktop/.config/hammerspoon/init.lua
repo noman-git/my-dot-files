@@ -74,3 +74,98 @@ for key, id in pairs(apps) do
 end
 
 hs.alert.show("Hammerspoon config loaded")
+
+-- Wi-Fi menu for SketchyBar. Network names need Location access, which only
+-- an app can get, so the bar asks Hammerspoon through hammerspoon:// URLs:
+--   hammerspoon://wifi-menu          scan and fill the wifi popup
+--   hammerspoon://wifi-join?ssid=X   join X (saved: no password; new: prompt)
+local SKETCHYBAR = "/opt/homebrew/bin/sketchybar"
+local WIFI_SETTINGS = "x-apple.systempreferences:com.apple.wifi-settings-extension"
+
+local function sketchybar(args)
+    hs.task.new(SKETCHYBAR, nil, args):start()
+end
+
+local function savedNetworks()
+    local out = hs.execute("networksetup -listpreferredwirelessnetworks en0") or ""
+    local saved = {}
+    for line in out:gmatch("[^\n]+") do
+        local name = line:match("^\t(.+)$")
+        if name then saved[name] = true end
+    end
+    return saved
+end
+
+local function fillWifiMenu(names, current)
+    local saved = savedNetworks()
+    local args = { "--remove", "/wifi\\.net\\..*/", "--remove", "wifi.settings" }
+    for i, name in ipairs(names) do
+        local item = "wifi.net." .. i
+        local icon = "󰖩"
+        if name == current then icon = "󰄬" elseif saved[name] then icon = "󰤨" end
+        local url = "hammerspoon://wifi-join?ssid=" .. hs.http.encodeForQuery(name)
+        for _, a in ipairs({ "--add", "item", item, "popup.wifi",
+            "--set", item, "icon=" .. icon, "label=" .. name,
+            "click_script=open -g '" .. url .. "'; " .. SKETCHYBAR .. " --set wifi popup.drawing=off" }) do
+            table.insert(args, a)
+        end
+    end
+    for _, a in ipairs({ "--add", "item", "wifi.settings", "popup.wifi",
+        "--set", "wifi.settings", "icon=󰒓", "label=Wi-Fi Settings",
+        "click_script=open '" .. WIFI_SETTINGS .. "'; " .. SKETCHYBAR .. " --set wifi popup.drawing=off" }) do
+        table.insert(args, a)
+    end
+    sketchybar(args)
+end
+
+local wifiScan
+hs.urlevent.bind("wifi-menu", function()
+    local current = hs.wifi.currentNetwork()
+    fillWifiMenu({ "Scanning…" }, nil)
+    wifiScan = hs.wifi.backgroundScan(function(networks)
+        local seen, names = {}, {}
+        if current then
+            seen[current] = true
+            table.insert(names, current)
+        end
+        table.sort(networks or {}, function(a, b) return (a.rssi or -100) > (b.rssi or -100) end)
+        for _, n in ipairs(networks or {}) do
+            local name = n.ssid
+            if name and name ~= "" and not seen[name] and #names < 12 then
+                seen[name] = true
+                table.insert(names, name)
+            end
+        end
+        if #names == 0 then
+            -- No Location access: names are hidden, so offer the saved networks.
+            for name in pairs(savedNetworks()) do table.insert(names, name) end
+            table.sort(names)
+        end
+        fillWifiMenu(names, current)
+    end)
+end)
+
+hs.urlevent.bind("wifi-join", function(_, params)
+    local ssid = params.ssid
+    if not ssid or ssid == "Scanning…" then return end
+    if savedNetworks()[ssid] then
+        local out = hs.execute("networksetup -setairportnetwork en0 '" .. ssid:gsub("'", "'\\''") .. "'") or ""
+        if out == "" then
+            hs.alert.show("Joined " .. ssid)
+            return
+        end
+    end
+    local button, password = hs.dialog.textPrompt("Join " .. ssid, "Wi-Fi password", "", "Join", "Cancel", true)
+    if button ~= "Join" then return end
+    if hs.wifi.associate(ssid, password) then
+        hs.alert.show("Joined " .. ssid)
+    else
+        hs.alert.show("Could not join " .. ssid)
+    end
+end)
+
+-- Ask for Location access once, so the scan can read network names.
+if hs.location.authorizationStatus() == "undetermined" then
+    hs.location.start()
+    hs.timer.doAfter(5, hs.location.stop)
+end
