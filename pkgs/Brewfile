@@ -55,6 +55,7 @@ brew "displayplacer"
 # Apps
 cask "kitty"
 cask "font-jetbrains-mono-nerd-font"
+cask "font-sketchybar-app-font"
 cask "linearmouse"
 cask "dbeaver-community"
 cask "doppler-app"

@@ -227,8 +227,13 @@ bind focuses the app, or opens it if it is not running. The list is `apps` in
 
 ### Bar and colours
 
-SketchyBar shows the OmniWM workspaces that have windows or focus, the front
-app, volume, battery and the clock. `sketchybarrc` starts one
+SketchyBar is translucent (`BAR_COLOR` alpha `0x40` plus blur) and shows all
+9 OmniWM workspaces with an icon for each app on them, the front app, volume,
+battery and the clock. The app icons come from `font-sketchybar-app-font`;
+`plugins/icon_map.sh` is the app name to icon map from the same release
+(v3.0.5). Download the new `icon_map.sh` from
+https://github.com/kvndrsslr/sketchybar-app-font/releases when you update
+the font, or new apps show no icon. `sketchybarrc` starts one
 `omniwmctl watch` process that sends `omniwm_change` to the bar; this needs
 `ipcEnabled = true` in the OmniWM settings. OmniWM's own workspace bar is off,
 and `gaps.outer.top = 37` keeps windows 4 points under the 33-point bar.
