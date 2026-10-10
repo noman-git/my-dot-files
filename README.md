@@ -4,6 +4,8 @@ Config for my Arch laptops: shell, terminal, tmux, neovim, the Hyprland
 desktop (JaKooLit dots rewritten in Lua), the system files under `/etc` and
 `/boot`, and the package lists. One `git clone --recurse-submodules` plus
 `./install_arch.sh` rebuilds a machine, with or without an NVIDIA GPU.
+The same shell setup plus a tiling desktop runs on macOS; see
+[macOS](#macos).
 
 The repo must live at `~/my-dot-files`. GNU stow links into the parent
 directory of the repo, so that path puts everything under `$HOME`.
@@ -25,6 +27,10 @@ scripts/              snapshot-packages.sh, bootstrap-desktop-state.sh
 seed/wallpaper.jpg    first wallpaper, so wallust has colours before you pick one
 install_arch.sh       full setup; calls install_system.sh at the end
 install_system.sh     /etc, /boot, SDDM theme, groups, services (sudo, idempotent)
+mac-desktop/          stow package for the macOS desktop:
+                        ~/.config/{omniwm/settings.toml,hammerspoon/init.lua}
+pkgs/Brewfile         macOS packages for brew bundle
+install_mac.sh        full macOS setup
 install_ubuntu.sh     shell-only setup for Ubuntu machines
 lang_setup.sh         pyenv, the neovim virtualenv, node (optional)
 setup_shell.sh        chsh to zsh
@@ -143,6 +149,85 @@ Outside the repo: `~/.cache/.theme_mode` (Dark or Light),
 `scripts/bootstrap-desktop-state.sh` creates the minimum of this on a fresh
 machine: the seed wallpaper, the two waybar symlinks, the mode files and one
 wallust run.
+
+## macOS
+
+Tested on an M4 Pro with macOS 27.0.1 (2026-10-10).
+
+1. Create an SSH key and add it to GitHub, the same as step 2 above.
+2. `xcode-select --install` for git.
+3. `git clone --recurse-submodules git@github.com:noman-git/my-dot-files.git ~/my-dot-files`
+4. `cd ~/my-dot-files && ./install_mac.sh`
+   Flags: `--no-brew` skips Homebrew and the Brewfile, `--no-defaults` skips
+   the `defaults write` settings (Dock autohide, key repeat, no Spaces
+   reordering, no drag-to-edge tiling).
+5. Give OmniWM Accessibility and Input Monitoring, and Hammerspoon
+   Accessibility, in System Settings > Privacy & Security. OmniWM does not
+   need Screen Recording; without it, Overview and workspace swipes show no
+   window thumbnails.
+6. In Raycast, set the hotkey to `Cmd+Space` and turn off the Spotlight
+   shortcut in System Settings > Keyboard > Keyboard Shortcuts > Spotlight.
+   `Option+D` sends `Cmd+Space`, so it opens whichever launcher has that key.
+
+What replaces what:
+
+| Hyprland desktop          | macOS                                              |
+| ------------------------- | -------------------------------------------------- |
+| Hyprland (dwindle)        | OmniWM, Dwindle layout by default                  |
+| exec binds                | Hammerspoon (`mac-desktop/.config/hammerspoon`)    |
+| rofi                      | Raycast                                            |
+| cliphist                  | Spotlight clipboard (`Cmd+4`)                      |
+| waybar                    | OmniWM workspace bar over the menu bar             |
+| SUPER+SHIFT+Return drop-down | OmniWM Quake terminal (Ghostty)                 |
+| grim, slurp, swappy       | `Cmd+Shift+5` toolbar                              |
+| hyprlock, hyprsunset      | lock screen, Night Shift                           |
+| nwg-displays              | System Settings > Displays, or `displayplacer`     |
+
+mainMod is `Option`, the key in the SUPER position on a Mac keyboard, so the
+binds sit where the Hyprland binds sit. `Command` stays free for app
+shortcuts. Window binds are in OmniWM; app binds are in Hammerspoon.
+
+| Bind                          | Action                                 |
+| ----------------------------- | -------------------------------------- |
+| `Option+Return`               | kitty                                  |
+| `Option+D`                    | launcher                               |
+| `Option+E`                    | Finder                                 |
+| `Option+B`                    | default browser                        |
+| `Option+Q`                    | close window                           |
+| `Option+Space`                | float or tile window                   |
+| `Option+Shift+F`              | fullscreen                             |
+| `Option+A`                    | Overview                               |
+| `Option+Shift+Return`         | drop-down terminal                     |
+| `Option+arrows`               | focus                                  |
+| `Control+Option+arrows`       | move window                            |
+| `Option+Shift+arrows`         | resize                                 |
+| `Option+1..9`                 | workspace                              |
+| `Option+Shift+1..9`           | move window to workspace               |
+| `Option+Tab`, `Option+Shift+Tab` | next, previous workspace            |
+| `Option+U`, `Option+Shift+U`  | scratchpad (special workspace)         |
+| `Option+G`                    | tab group                              |
+| `Option+Shift+I`              | toggle split                           |
+| `Option+Command+L`            | dwindle or scrolling layout            |
+| `Option+Shift+S`              | screenshot toolbar                     |
+| `Control+Option+L`            | lock screen                            |
+| `Control+Option+Space`        | OmniWM command palette                 |
+
+Every other OmniWM bind is listed in `settings.toml` under `[[hotkeys]]`.
+
+### Editing the OmniWM config
+
+`settings.toml` is the complete file that OmniWM writes. The schema is
+strict: one missing key, an unknown hotkey id, or the same id twice makes
+OmniWM reject the whole file and run with defaults. Change values in place
+and do not delete keys. OmniWM reloads the file on save.
+
+The Settings window writes back to the same file through the symlink, so a
+change there shows in `git status`. OmniWM rewrites the file in its own key
+order and drops comments, so the file has no comments.
+
+After an OmniWM upgrade that adds a key or a hotkey, OmniWM rewrites the file
+and keeps a copy as `settings.toml.pre-v4` (or the next version) next to it.
+Commit the rewritten file.
 
 ## Daily use
 
