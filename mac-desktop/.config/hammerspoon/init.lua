@@ -638,3 +638,20 @@ bind({ "alt", "cmd", "shift" }, "n", "new sticky note", whenModifiersUp(function
         return app and app:isFrontmost()
     end, function() hs.eventtap.keyStroke({ "cmd" }, "n", 0) end, 0.05)
 end))
+
+-- Location for the bar's weather item: write "lat,lon" to ~/.cache/location
+-- at start and every hour. With a VPN the IP address shows the VPN server's
+-- city, so the weather item prefers this file.
+local LOCATION_FILE = os.getenv("HOME") .. "/.cache/location"
+local function saveLocation()
+    hs.location.start()
+    hs.timer.doAfter(10, function()
+        local loc = hs.location.get()
+        hs.location.stop()
+        if loc and loc.latitude then
+            writeFile(LOCATION_FILE, string.format("%.3f,%.3f", loc.latitude, loc.longitude))
+        end
+    end)
+end
+saveLocation()
+local locationTimer = hs.timer.doEvery(3600, saveLocation)

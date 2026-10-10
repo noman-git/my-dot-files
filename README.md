@@ -256,7 +256,12 @@ bind focuses the app, or opens it if it is not running. The list is `apps` in
 SketchyBar is translucent (`BAR_COLOR` alpha `0x40` plus blur) and shows all
 9 OmniWM workspaces with an icon for each app on them and the front app. On
 the right: Wi-Fi, Bluetooth (connected devices, through `blueutil`), volume,
-a bell, battery and the clock. The bell shows the sum of the Dock badges of
+battery, a bell, a VPN icon, the weather and the clock. The VPN icon is on
+when the default route goes through a `utun` interface; NordVPN for macOS
+has no command-line tool, so a click opens the app. The weather comes from
+wttr.in for the place in `~/.cache/location`, which Hammerspoon writes every
+hour from Location Services (the IP address would give the VPN server's
+city); a click shows the 3-day forecast. The bell shows the sum of the Dock badges of
 running apps (`lsappinfo`) and opens the Notification Center on click: it
 asks Hammerspoon to press `Hyper+N`, the "Show Notification Center" shortcut
 that `install_mac.sh` turns on. The status icons of background apps
