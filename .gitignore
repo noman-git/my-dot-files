@@ -47,3 +47,10 @@ __pycache__/
 # macOS: Karabiner keeps backups next to karabiner.json, and the stow link is
 # the whole ~/.config/karabiner dir (Karabiner replaces the file on save).
 mac-desktop/.config/karabiner/automatic_backups/
+
+# Folders that programs fill at runtime; only the stowed files belong here
+# (the installers create the real dirs first, this is the safety net).
+tmux/.tmux/*
+!tmux/.tmux/fit-windows.sh
+claude/.claude/*
+!claude/.claude/settings.json

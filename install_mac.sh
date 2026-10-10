@@ -57,11 +57,19 @@ stow_packages() {
   # karabiner.json on save, which breaks a file link, so stow links the dir.
   # ~/.claude holds Claude Code's history and caches: only settings.json
   # may be a link.
-  mkdir -p "$HOME/Library/LaunchAgents" "$HOME/.claude"
+  # ~/.tmux holds tpm and its plugins: only fit-windows.sh may be a link.
+  mkdir -p "$HOME/Library/LaunchAgents" "$HOME/.claude" "$HOME/.tmux"
   mkdir -p "$HOME/.config/omniwm" "$HOME/.config/hammerspoon" "$HOME/.config/kitty" \
     "$HOME/.config/sketchybar" "$HOME/.config/wallust" "$HOME/.config/cava" "$HOME/.local/bin"
   local p
   for p in "${STOW_PACKAGES[@]}"; do
+    # A real ~/.claude/settings.json holds this machine's own Claude settings:
+    # leave it, merge it into claude/.claude/settings.json by hand, then move
+    # it aside and rerun.
+    if [ "$p" = claude ] && [ -f "$HOME/.claude/settings.json" ] && [ ! -L "$HOME/.claude/settings.json" ]; then
+      log "skipping claude: ~/.claude/settings.json is a real file; merge it into claude/.claude/settings.json, move it aside, rerun"
+      continue
+    fi
     if ! stow -R -v "$p"; then
       die "stow $p failed. A real file is in the way; move it aside (do not use --adopt) and rerun."
     fi
