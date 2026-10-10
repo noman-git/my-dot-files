@@ -90,6 +90,11 @@ func refresh() {
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
 
+// First thing: the bar sends SIGUSR1 to every process named glassbar, and
+// its default action ends the process (the demo closed at the next
+// workspace change).
+signal(SIGUSR1, SIG_IGN)
+
 // `glassbar --demo`: a window with coloured stripes behind six glass pills,
 // one per style, tint and interactive setting, to compare with Control
 // Center. It closes after 60 seconds.
@@ -142,7 +147,6 @@ if CommandLine.arguments.dropFirst().first == "--demo" {
     app.run()
 }
 
-signal(SIGUSR1, SIG_IGN)
 let usr1 = DispatchSource.makeSignalSource(signal: SIGUSR1, queue: .main)
 usr1.setEventHandler { refresh() }
 usr1.resume()
