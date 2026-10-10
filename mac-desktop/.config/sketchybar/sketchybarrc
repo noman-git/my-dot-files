@@ -21,8 +21,12 @@ sketchybar --default updates=when_shown \
 sketchybar --add event omniwm_change
 
 # Workspace number, then the app icons (sketchybar-app-font) in the label.
-for i in 1 2 3 4 5 6 7 8 9; do
-  sketchybar --add item "ws.$i" left \
+# Both sides of the notch fill outward from it, so 1-5 are added in reverse
+# to read 1 2 3 4 5 | notch | 6 7 8 9.
+for i in 5 4 3 2 1 6 7 8 9; do
+  # 1-5 left of the camera notch (q), 6-9 right of it (e).
+  if [ "$i" -le 5 ]; then pos=q; else pos=e; fi
+  sketchybar --add item "ws.$i" "$pos" \
     --set "ws.$i" icon="$i" icon.color="$MUTED_COLOR" \
       label.font="sketchybar-app-font:Regular:14.0" label.drawing=off \
       label.padding_left=2 label.padding_right=8 label.y_offset=-1 \
@@ -61,6 +65,13 @@ slots() {
     sketchybar --add item "$2.$i" "popup.$1" --set "$2.$i" drawing=off
   done
 }
+
+# Music visualizer, the rightmost item. Hammerspoon runs plugins/cava_bar.sh
+# (cava needs the audio permission, and Hammerspoon has a fixed app path for
+# it); the script writes the bars into this label.
+sketchybar --add item cava right \
+  --set cava icon.drawing=off label="▁▁▁▁▁▁▁▁▁▁▁▁" label.color="$ACCENT_COLOR" \
+    label.font="JetBrainsMono Nerd Font:Regular:14.0" label.padding_right=8
 
 sketchybar --add item clock right \
   --set clock update_freq=10 icon=󰥔 script="$PLUGIN_DIR/clock.sh" \

@@ -282,9 +282,11 @@ in `hammerspoon/init.lua`.
 
 ### Bar
 
-SketchyBar is translucent (`BAR_COLOR` alpha `0x40` plus blur). On the left
-it shows all 9 OmniWM workspaces with an icon for each app on them, and the
-front app. `sketchybarrc` starts `plugins/omniwm_watch.sh`, which runs
+SketchyBar is translucent (`BAR_COLOR` alpha `0x40` plus blur). The 9
+OmniWM workspaces, each with an icon for every app on it, sit around the
+camera notch: 1 to 5 left of it (position `q`), 6 to 9 right of it (`e`). On
+a display without a notch they sit around the middle. The front app is on
+the left. `sketchybarrc` starts `plugins/omniwm_watch.sh`, which runs
 `omniwmctl watch` in a loop and sends `omniwm_change` to the bar; this needs
 `ipcEnabled = true` in the OmniWM settings. OmniWM's own workspace bar is
 off, and `gaps.outer.top = 37` keeps windows 4 points under the 33-point
@@ -294,8 +296,17 @@ bar. The app icons come from `font-sketchybar-app-font`;
 https://github.com/kvndrsslr/sketchybar-app-font/releases when you update
 the font, or new apps show no icon.
 
-On the right, from the right edge: clock, weather, VPN, bell, battery,
-volume, Bluetooth, Wi-Fi.
+On the right, from the right edge: music bars, clock, weather, VPN, bell,
+battery, volume, Bluetooth, Wi-Fi.
+
+- The music bars are cava, like `WaybarCava.sh` on Arch: Hammerspoon runs
+  `plugins/cava_bar.sh`, which reads 12 bars from cava (`cava_bar.conf`,
+  Core Audio tap) and writes them as block characters into the item.
+  Hammerspoon starts it so that the audio permission belongs to a fixed app:
+  add `/Applications/Hammerspoon.app` under **System Audio Recording Only**,
+  then reload Hammerspoon. Without the permission cava stops at once and
+  opens System Settings, so Hammerspoon does not restart it and shows a
+  message.
 
 - Wi-Fi, Bluetooth, volume and battery open a menu under the item. Menu
   entries are fixed slots that `sketchybarrc` makes and the scripts fill;

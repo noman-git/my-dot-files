@@ -857,3 +857,24 @@ saveLocation()
 local locationTimer = hs.timer.doEvery(3600, saveLocation)
 
 
+
+-- Music bars in SketchyBar (plugins/cava_bar.sh). Hammerspoon runs it so the
+-- Core Audio tap checks Hammerspoon's "System Audio Recording Only"
+-- permission. If cava ends within 30 s it is almost always that permission
+-- (cava then opens System Settings), so it is not restarted: allow
+-- Hammerspoon there and reload Hammerspoon (Ctrl+Option+Shift+R).
+local CAVA_BAR = os.getenv("HOME") .. "/.config/sketchybar/plugins/cava_bar.sh"
+local cavaTask
+local function startCavaBar()
+    local started = hs.timer.secondsSinceEpoch()
+    cavaTask = hs.task.new("/bin/bash", function()
+        if hs.timer.secondsSinceEpoch() - started > 30 then
+            hs.timer.doAfter(5, startCavaBar)
+        else
+            hs.alert.show("Music bars: allow Hammerspoon under System Audio Recording Only, then reload Hammerspoon")
+        end
+    end, { CAVA_BAR })
+    cavaTask:setEnvironment(CLEAN_ENV)
+    cavaTask:start()
+end
+startCavaBar()
