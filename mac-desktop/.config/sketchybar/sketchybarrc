@@ -8,8 +8,11 @@ source "$CONFIG_DIR/colors.sh"
 
 FONT="JetBrainsMono Nerd Font"
 
+# padding_right leaves room for the macOS privacy dot (purple while cava
+# records system audio for the music bars), which macOS draws at the top
+# right above every window.
 sketchybar --bar position=top height=33 blur_radius=30 color="$BAR_COLOR" \
-  topmost=off sticky=on padding_left=8 padding_right=8 notch_width=200
+  topmost=off sticky=on padding_left=8 padding_right=26 notch_width=200
 
 sketchybar --default updates=when_shown \
   icon.font="$FONT:Bold:14.0" icon.color="$ICON_COLOR" \
