@@ -123,13 +123,18 @@ hs.urlevent.bind("wifi-menu", function()
     local current = hs.wifi.currentNetwork()
     fillWifiMenu({ "Scanning…" }, nil)
     wifiScan = hs.wifi.backgroundScan(function(networks)
+        -- On an error the callback gets a string. Then use the last cached
+        -- scan, which can be empty.
+        if type(networks) ~= "table" then
+            networks = (hs.wifi.interfaceDetails() or {}).cachedScanResults or {}
+        end
         local seen, names = {}, {}
         if current then
             seen[current] = true
             table.insert(names, current)
         end
-        table.sort(networks or {}, function(a, b) return (a.rssi or -100) > (b.rssi or -100) end)
-        for _, n in ipairs(networks or {}) do
+        table.sort(networks, function(a, b) return (a.rssi or -100) > (b.rssi or -100) end)
+        for _, n in ipairs(networks) do
             local name = n.ssid
             if name and name ~= "" and not seen[name] and #names < 12 then
                 seen[name] = true
@@ -164,8 +169,20 @@ hs.urlevent.bind("wifi-join", function(_, params)
     end
 end)
 
--- Ask for Location access once, so the scan can read network names.
-if hs.location.authorizationStatus() == "undetermined" then
+-- Ask for Location access, so the scan can read network names. macOS adds
+-- Hammerspoon to Privacy & Security > Location Services only after this.
+--   hammerspoon://location-request   ask again and write the status to
+--                                    ~/.cache/hammerspoon-location
+local function requestLocation()
     hs.location.start()
-    hs.timer.doAfter(5, hs.location.stop)
+    hs.timer.doAfter(10, function()
+        hs.location.stop()
+        local f = io.open(os.getenv("HOME") .. "/.cache/hammerspoon-location", "w")
+        if f then
+            f:write(tostring(hs.location.servicesEnabled()), " ", hs.location.authorizationStatus(), "\n")
+            f:close()
+        end
+    end)
 end
+hs.urlevent.bind("location-request", requestLocation)
+if hs.location.authorizationStatus() == "undetermined" then requestLocation() end

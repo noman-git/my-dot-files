@@ -151,13 +151,28 @@ position = "center"
 widthPercent = 50.0
 
 [routing]
-mode = "macOS"
+mode = "custom"
 
 [[routing.arrangements]]
 id = "70F85C7A-34DA-4408-A693-1F9D77B23D98"
 
 [[routing.arrangements.monitors]]
 gridColumn = 0
+gridRow = 0
+monitorDisplayUUID = "37D8832A-2D66-02CA-B9F7-8F30A301B230"
+monitorName = "Built-in Retina Display"
+
+[[routing.arrangements]]
+id = "987684C8-033A-4C94-B6F7-B8DA8881884C"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 0
+monitorDisplayUUID = "1F085BDC-4ECF-42A8-AA19-4F26E1560ECE"
+monitorName = "LEN P24q-20"
+
+[[routing.arrangements.monitors]]
+gridColumn = 1
 gridRow = 0
 monitorDisplayUUID = "37D8832A-2D66-02CA-B9F7-8F30A301B230"
 monitorName = "Built-in Retina Display"
@@ -1109,7 +1124,7 @@ layoutType = "default"
 name = "8"
 
 [workspaces.monitorAssignment]
-type = "main"
+type = "secondary"
 
 [[workspaces]]
 id = "8D4D711C-2B2F-4FEC-86BF-FA952037738A"
@@ -1117,4 +1132,4 @@ layoutType = "default"
 name = "9"
 
 [workspaces.monitorAssignment]
-type = "main"
+type = "secondary"
