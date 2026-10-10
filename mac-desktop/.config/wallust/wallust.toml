@@ -1,4 +1,4 @@
-# wallust config for macOS. mac-wallpaper runs `wallust run -d ~/.config/wallust`
+# wallust config for macOS. mac-wallpaper runs `wallust run -s -d ~/.config/wallust`
 # because wallust on macOS reads ~/Library/Application Support by default.
 # Same palette settings as hypr-desktop/.config/wallust/wallust.toml.
 

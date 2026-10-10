@@ -23,6 +23,7 @@ else
   img="$(cat "$STATE")"
 fi
 
-"$WALLUST" run -q -d "$HOME/.config/wallust" --dynamic-threshold "$img"
+# -s: do not send colour codes to open terminals; kitty keeps its own colours.
+"$WALLUST" run -q -s -d "$HOME/.config/wallust" --dynamic-threshold "$img"
 
 command -v sketchybar >/dev/null 2>&1 && sketchybar --reload
