@@ -70,7 +70,7 @@ slots() {
 # (cava needs the audio permission, and Hammerspoon has a fixed app path for
 # it); the script writes the bars into this label.
 sketchybar --add item cava right \
-  --set cava icon.drawing=off label="▁▁▁▁▁▁▁▁▁▁▁▁" label.color="$ACCENT_COLOR" \
+  --set cava icon.drawing=off label="▁▁▁▁▁▁▁▁" label.color="$ACCENT_COLOR" \
     label.font="JetBrainsMono Nerd Font:Regular:14.0" label.padding_right=8
 
 sketchybar --add item clock right \
@@ -85,7 +85,7 @@ slots weather weather.day 3
 sketchybar --set weather.day.1 drawing=on --set weather.day.2 drawing=on --set weather.day.3 drawing=on
 
 sketchybar --add item vpn right \
-  --set vpn update_freq=10 icon=󰦞 label.drawing=off script="$PLUGIN_DIR/vpn.sh" \
+  --set vpn update_freq=10 updates=on icon=󰦞 label.drawing=off script="$PLUGIN_DIR/vpn.sh" \
     click_script="open -a NordVPN" \
   --subscribe vpn wifi_change system_woke
 
@@ -106,7 +106,7 @@ sketchybar --add item battery right \
     click_script="open '$SETTINGS.Battery-Settings.extension'; sketchybar --set battery popup.drawing=off"
 
 sketchybar --add item volume right \
-  --set volume script="$PLUGIN_DIR/volume.sh" \
+  --set volume script="$PLUGIN_DIR/volume.sh" label.drawing=off \
   --subscribe volume volume_change mouse.clicked mouse.exited.global \
   --add slider volume.slider popup.volume 160 \
   --set volume.slider script="$PLUGIN_DIR/volume_slider.sh" \

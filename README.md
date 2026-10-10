@@ -284,7 +284,10 @@ in `hammerspoon/init.lua`.
 
 SketchyBar is translucent (`BAR_COLOR` alpha `0x40` plus blur). The 9
 OmniWM workspaces, each with an icon for every app on it, sit around the
-camera notch: 1 to 5 left of it (position `q`), 6 to 9 right of it (`e`). On
+camera notch: 1 to 5 left of it (position `q`), 6 to 9 right of it (`e`). A
+workspace shows at most 2 app icons, then `+N`, so 6 to 9 do not grow into
+the system items on the right; the clock shows only the time, the volume
+only its icon, and the VPN icon only while a VPN is on. On
 a display without a notch they sit around the middle. The front app is on
 the left. `sketchybarrc` starts `plugins/omniwm_watch.sh`, which runs
 `omniwmctl watch` in a loop and sends `omniwm_change` to the bar; this needs
