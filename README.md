@@ -14,10 +14,11 @@ directory of the repo, so that path puts everything under `$HOME`.
 
 ```
 git/ zsh/ tmux/ tmux-powerline/ kitty/   stow packages, target is $HOME
+btop/ fastfetch/      stow packages, shared by Arch and macOS
 nvim/                 stow package; ~/.config/nvim is the my-nvim-config submodule
 hypr-desktop/         stow package for the whole desktop:
-                        ~/.config/{hypr,waybar,rofi,swaync,wlogout,cava,wallust,btop,
-                                   fastfetch,quickshell,Kvantum,qt5ct,qt6ct,gtk-3.0,
+                        ~/.config/{hypr,waybar,rofi,swaync,wlogout,cava,wallust,
+                                   quickshell,Kvantum,qt5ct,qt6ct,gtk-3.0,
                                    nwg-displays,xremap}
                         ~/.config/systemd/user/{hyprland-session.target,xremap.service}
                         ~/.local/bin/hypr-normalize-monitors

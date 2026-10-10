@@ -18,7 +18,7 @@ cd "$REPO"
 
 DO_BREW=1
 DO_DEFAULTS=1
-STOW_PACKAGES=(git zsh tmux tmux-powerline kitty nvim mac-desktop)
+STOW_PACKAGES=(git zsh tmux tmux-powerline kitty nvim btop fastfetch mac-desktop)
 
 log() { printf '\n== %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }

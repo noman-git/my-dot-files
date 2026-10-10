@@ -19,7 +19,7 @@ NVIDIA=auto
 DEV_SERVICES=0
 SKIP_AUR=0
 DO_SYSTEM=1
-STOW_PACKAGES=(git zsh tmux tmux-powerline kitty nvim hypr-desktop)
+STOW_PACKAGES=(git zsh tmux tmux-powerline kitty nvim btop fastfetch hypr-desktop)
 
 log() { printf '\n== %s\n' "$*"; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
