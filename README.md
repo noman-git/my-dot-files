@@ -288,8 +288,8 @@ camera notch: 1 to 5 left of it (position `q`), 6 to 9 right of it (`e`). A
 workspace shows at most 2 app icons, then `+N`, so 6 to 9 do not grow into
 the system items on the right; the clock shows only the time, the volume
 only its icon, and the VPN icon only while a VPN is on. On
-a display without a notch they sit around the middle. The front app is on
-the left. `sketchybarrc` starts `plugins/omniwm_watch.sh`, which runs
+a display without a notch they sit around the middle. The music bars are
+at the far left. `sketchybarrc` starts `plugins/omniwm_watch.sh`, which runs
 `omniwmctl watch` in a loop and sends `omniwm_change` to the bar; this needs
 `ipcEnabled = true` in the OmniWM settings. OmniWM's own workspace bar is
 off, and `gaps.outer.top = 37` keeps windows 4 points under the 33-point
@@ -299,8 +299,8 @@ bar. The app icons come from `font-sketchybar-app-font`;
 https://github.com/kvndrsslr/sketchybar-app-font/releases when you update
 the font, or new apps show no icon.
 
-On the right, from the right edge: music bars, clock, weather, VPN, bell,
-battery, volume, Bluetooth, Wi-Fi.
+On the right, from the right edge: clock, weather, VPN, bell, battery,
+volume, Bluetooth, Wi-Fi.
 
 - The music bars are cava, like `WaybarCava.sh` on Arch: Hammerspoon runs
   `plugins/cava_bar.sh`, which reads 12 bars from cava (`cava_bar.conf`,
