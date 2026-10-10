@@ -258,6 +258,16 @@ lists every bind, including all OmniWM binds read from its `settings.toml`.
 | `Hyper+N`                     | Notification Center                    |
 | `Hyper+T/B/C/S/D/M/F`         | kitty, Zen, Chrome, Slack, DBeaver, MongoDB Compass, Finder |
 
+OmniWM follows macOS app activation and has no setting for it (0.7.6). So
+`Option+Return` and `Option+E` noted a new window, but macOS first showed
+the app's older window and OmniWM jumped to that workspace. Hammerspoon
+follows `omniwmctl subscribe` and undoes such jumps: a window opened by
+those binds stays on the workspace you pressed them on, and when the last
+window of a workspace closes, a jump within 1.5 seconds is switched back.
+Any key press with `Option` cancels that guard. `Option+E` always makes a
+new Finder window through AppleScript (`open ~` only brought up an existing
+one), so Hammerspoon asks once for Automation access to Finder.
+
 Hyper is `Caps Lock` held (Karabiner sends Ctrl+Option+Shift+Cmd). A Hyper
 bind focuses the app, or opens it if it is not running. The list is `apps` in
 `hammerspoon/init.lua`. Hammerspoon opens apps only after every modifier is

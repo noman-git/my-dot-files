@@ -37,13 +37,149 @@ local function bind(mods, key, desc, fn)
     table.insert(hammerspoonBinds, { mods = mods, key = key, desc = desc, fn = fn })
 end
 
+-- Workspace guard. OmniWM follows macOS app activation: when the last
+-- window on a workspace closes, macOS activates another app and OmniWM
+-- jumps to that app's workspace; when a bind opens a window of an app that
+-- has windows elsewhere, OmniWM jumps there too. OmniWM's own close recovery
+-- only covers the same app, and it has no setting for this (0.7.6). This
+-- follows `omniwmctl subscribe` and undoes those jumps:
+--   * the last window on the active workspace closes, and within 1.5 s the
+--     active workspace changes: switch back.
+--   * openHere(fn) notes the workspace; the next new window moves to it if
+--     it landed elsewhere, the view switches back to it and the window gets
+--     the focus.
+local OMNIWMCTL = "/opt/homebrew/bin/omniwmctl"
+local omniwm = { active = nil, windows = {}, guard = nil, lastSwitch = nil, pendingOpen = nil }
+
+local function omniwmCommand(args)
+    hs.task.new(OMNIWMCTL, nil, args):start()
+end
+
+local function countOn(ws, windows)
+    local n = 0
+    for _, w in pairs(windows) do if w == ws then n = n + 1 end end
+    return n
+end
+
+local function onActiveWorkspace(ws)
+    local now = hs.timer.secondsSinceEpoch()
+    local previous = omniwm.active
+    omniwm.active = ws
+    if previous and previous ~= ws then
+        omniwm.lastSwitch = { from = previous, to = ws, time = now }
+    end
+    local g = omniwm.guard
+    if g and ws ~= g.ws and now < g.untilTime then
+        omniwm.guard = nil
+        omniwmCommand({ "command", "switch-workspace", tostring(g.ws) })
+    end
+end
+
+local function onWindows(list)
+    local now = hs.timer.secondsSinceEpoch()
+    local current, windowIds = {}, {}
+    for _, w in ipairs(list) do
+        if w.id and w.workspace and w.workspace.number and not w.isScratchpad then
+            current[w.id] = w.workspace.number
+            windowIds[w.id] = w.windowId
+        end
+    end
+    -- Closed windows: stay on a workspace that became empty.
+    for id, ws in pairs(omniwm.windows) do
+        if current[id] == nil and countOn(ws, current) == 0 then
+            local s = omniwm.lastSwitch
+            if ws == omniwm.active then
+                omniwm.guard = { ws = ws, untilTime = now + 1.5 }
+            elseif s and s.from == ws and now - s.time < 1.5 then
+                omniwmCommand({ "command", "switch-workspace", tostring(ws) })
+            end
+        end
+    end
+    -- New windows after openHere: bring them to the noted workspace.
+    local p = omniwm.pendingOpen
+    if p and now < p.untilTime then
+        for id, ws in pairs(current) do
+            if omniwm.windows[id] == nil and not p.known[id] then
+                omniwm.pendingOpen = nil
+                if ws ~= p.ws then
+                    omniwmCommand({ "window", "move-to-workspace", id, tostring(p.ws) })
+                end
+                -- macOS activation can show the app's older window on another
+                -- workspace first, so switch back and focus the new window.
+                local wid = windowIds[id]
+                hs.timer.doAfter(0.2, function()
+                    if omniwm.active ~= p.ws then
+                        omniwmCommand({ "command", "switch-workspace", tostring(p.ws) })
+                    end
+                    local win = wid and hs.window.get(wid)
+                    if win then win:focus() end
+                end)
+                break
+            end
+        end
+    end
+    omniwm.windows = current
+end
+
+local omniwmBuffer, omniwmTask = "", nil
+local function startOmniwmWatch()
+    omniwmTask = hs.task.new(OMNIWMCTL, function()
+        hs.timer.doAfter(2, startOmniwmWatch)
+    end, function(_, out)
+        omniwmBuffer = omniwmBuffer .. (out or "")
+        while true do
+            local line, rest = omniwmBuffer:match("^([^\n]*)\n(.*)$")
+            if not line then break end
+            omniwmBuffer = rest
+            local ok, ev = pcall(hs.json.decode, line)
+            local payload = ok and ev and ev.result and ev.result.payload
+            if payload and ev.channel == "active-workspace" and payload.workspace then
+                onActiveWorkspace(payload.workspace.number)
+            elseif payload and ev.channel == "windows-changed" and payload.windows then
+                onWindows(payload.windows)
+            end
+        end
+        return true
+    end, { "subscribe", "active-workspace,windows-changed", "--format", "ndjson", "--reconnect" })
+    omniwmTask:start()
+end
+startOmniwmWatch()
+
+-- A key press with Option is an OmniWM or Hammerspoon bind, so a workspace
+-- switch after it is wanted: cancel the guard.
+local guardKeyTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(e)
+    if e:getFlags().alt then omniwm.guard = nil; omniwm.lastSwitch = nil end
+    return false
+end)
+guardKeyTap:start()
+
+local function openHere(fn)
+    return function()
+        if omniwm.active then
+            local known = {}
+            for id in pairs(omniwm.windows) do known[id] = true end
+            omniwm.pendingOpen = { ws = omniwm.active, known = known,
+                untilTime = hs.timer.secondsSinceEpoch() + 4 }
+        end
+        fn()
+    end
+end
+
 -- One kitty process for every window, so OmniWM sees one app. `open -na`
 -- started a new kitty process each time.
-bind(mainMod, "return", "terminal", function()
+bind(mainMod, "return", "terminal", openHere(function()
     hs.task.new("/Applications/kitty.app/Contents/MacOS/kitty",
         nil, { "--single-instance", "--directory", os.getenv("HOME") }):start()
-end)
-bind(mainMod, "e", "file manager", sh("open ~"))
+end))
+-- Always a new Finder window: `open ~` only brings up an existing window of
+-- the home folder, on whatever workspace it is. Asks once for Automation
+-- access to Finder.
+local function newFinderWindow()
+    hs.osascript.applescript('tell application "Finder"\n'
+        .. 'make new Finder window to (path to home folder)\n'
+        .. 'activate\nend tell')
+end
+bind(mainMod, "e", "file manager", openHere(newFinderWindow))
 bind(mainMod, "b", "default browser", whenModifiersUp(function()
     local id = hs.urlevent.getDefaultHandler("https")
     if id then hs.application.launchOrFocusByBundleID(id) end
@@ -694,3 +830,4 @@ local function saveLocation()
 end
 saveLocation()
 local locationTimer = hs.timer.doEvery(3600, saveLocation)
+
