@@ -282,7 +282,12 @@ in `hammerspoon/init.lua`.
 
 ### Bar
 
-SketchyBar is translucent (`BAR_COLOR` alpha `0x40` plus blur). The 9
+SketchyBar is a floating glass pill, in the style of macOS Liquid Glass: 8
+points from the screen sides and 4 from the top, a light tint
+(`GLASS_COLOR`), blur 40, a 1-point bright edge and a shadow. Only the bar
+and its menus can blur in SketchyBar, so the whole bar is the glass. The
+colours in `colors.sh` are fixed, so the bar looks the same on every
+wallpaper. The 9
 OmniWM workspaces, each with an icon for every app on it, sit around the
 camera notch: 1 to 5 left of it (position `q`), 6 to 9 right of it (`e`). A
 workspace shows at most 2 app icons, then `+N`, so 6 to 9 do not grow into
@@ -292,8 +297,9 @@ a display without a notch they sit around the middle. The music bars are
 at the far left. `sketchybarrc` starts `plugins/omniwm_watch.sh`, which runs
 `omniwmctl watch` in a loop and sends `omniwm_change` to the bar; this needs
 `ipcEnabled = true` in the OmniWM settings. OmniWM's own workspace bar is
-off, and `gaps.outer.top = 37` keeps windows 4 points under the 33-point
-bar. The app icons come from `font-sketchybar-app-font`;
+off. `gaps.outer.top = 42` keeps windows 6 points under the bar, and
+`gaps.fullscreenUsesOuterGaps = true` does the same for a single window
+and for `Option+Shift+F`; without it a lone window went under the bar. The app icons come from `font-sketchybar-app-font`;
 `plugins/icon_map.sh` is the app name to icon map from the same release
 (v3.0.5). Download the new `icon_map.sh` from
 https://github.com/kvndrsslr/sketchybar-app-font/releases when you update
@@ -345,10 +351,11 @@ macOS 27 SketchyBar cannot copy them (Screen Recording and SketchyBar issue
 
 `mac-wallpaper <image>` sets the wallpaper on every display and runs
 `wallust run -s -d ~/.config/wallust`. wallust on macOS reads
-`~/Library/Application Support` by default, hence `-d`. It writes
-`~/.config/sketchybar/wallust-colors.sh` (not in git), then reloads
-SketchyBar. `mac-wallpaper` with no image recolours from the last image;
-the path is in `~/.cache/.current_wallpaper`.
+`~/Library/Application Support` by default, hence `-d`. It writes only the
+cava config; the bar keeps its fixed glass colours, because wallust accents
+from dark wallpapers were too dark on the glass. `mac-wallpaper` with no
+image recolours from the last image; the path is in
+`~/.cache/.current_wallpaper`.
 
 kitty keeps its own colours. `-s` stops wallust from sending colour codes to
 open terminals: without it every wallpaper change turned kitty's green and

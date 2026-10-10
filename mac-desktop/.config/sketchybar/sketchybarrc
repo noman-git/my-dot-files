@@ -11,13 +11,19 @@ FONT="JetBrainsMono Nerd Font"
 # padding_right leaves room for the macOS privacy dot (purple while cava
 # records system audio for the music bars), which macOS draws at the top
 # right above every window.
-sketchybar --bar position=top height=33 blur_radius=30 color="$BAR_COLOR" \
-  topmost=off sticky=on padding_left=8 padding_right=26 notch_width=200
+# A floating glass pill: 8 points from the screen sides and 4 from the top.
+# Only the bar and its menus can blur what is behind them in SketchyBar, so
+# the whole bar is the glass, not single items. OmniWM keeps windows under it
+# (gaps.outer.top = 42 in settings.toml: 4 + 32 + 6).
+sketchybar --bar position=top height=32 y_offset=4 margin=8 corner_radius=16 \
+  color="$GLASS_COLOR" border_color="$GLASS_EDGE" border_width=1 \
+  blur_radius=40 shadow=on topmost=off sticky=on \
+  padding_left=10 padding_right=26 notch_width=200
 
 sketchybar --default updates=when_shown \
-  icon.font="$FONT:Bold:14.0" icon.color="$ICON_COLOR" \
-  label.font="$FONT:Bold:13.0" label.color="$LABEL_COLOR" \
-  padding_left=4 padding_right=4 \
+  icon.font="$FONT:Regular:15.0" icon.color="$ICON_COLOR" \
+  label.font="$FONT:SemiBold:13.0" label.color="$LABEL_COLOR" \
+  padding_left=3 padding_right=3 \
   icon.padding_left=6 icon.padding_right=4 \
   label.padding_left=4 label.padding_right=6
 
@@ -40,7 +46,8 @@ for i in 5 4 3 2 1 6 7 8 9; do
     --set "ws.$i" icon="$i" icon.color="$MUTED_COLOR" \
       label.font="sketchybar-app-font:Regular:14.0" label.drawing=off \
       label.padding_left=2 label.padding_right=8 label.y_offset=-1 \
-      background.color="$ACCENT_COLOR" background.corner_radius=6 \
+      background.color="$GLASS_ACTIVE" background.corner_radius=10 \
+      background.border_color="$GLASS_EDGE" background.border_width=1 \
       background.height=24 background.drawing=off \
       click_script="omniwmctl command switch-workspace $i"
 done
@@ -59,9 +66,9 @@ sketchybar --add item workspaces left \
 SETTINGS="x-apple.systempreferences:com.apple"
 
 sketchybar --default popup.background.color="$POPUP_COLOR" \
-  popup.background.corner_radius=10 popup.background.border_width=1 \
-  popup.background.border_color="$MUTED_COLOR" popup.blur_radius=30 \
-  popup.align=center popup.y_offset=4
+  popup.background.corner_radius=14 popup.background.border_width=1 \
+  popup.background.border_color="$GLASS_EDGE" popup.blur_radius=50 \
+  popup.background.shadow.drawing=on popup.align=center popup.y_offset=8
 
 # slots <parent> <prefix> <count>: hidden menu entries prefix.1 .. prefix.count
 slots() {

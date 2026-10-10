@@ -44,14 +44,14 @@ moveMouseToFocusedWindow = false
 raiseOnMouseFocus = false
 
 [gaps]
-fullscreenUsesOuterGaps = false
+fullscreenUsesOuterGaps = true
 size = 4.0
 
 [gaps.outer]
 bottom = 4.0
 left = 4.0
 right = 4.0
-top = 37.0
+top = 42.0
 
 [general]
 animationSpeed = 1.0

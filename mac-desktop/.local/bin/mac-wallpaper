@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Set the wallpaper and recolour SketchyBar from it with wallust.
+# Set the wallpaper and recolour cava from it with wallust.
 #
 #   mac-wallpaper <image>   set this image on every display, then recolour
 #   mac-wallpaper           recolour from the last image set with this script
@@ -26,4 +26,3 @@ fi
 # -s: do not send colour codes to open terminals; kitty keeps its own colours.
 "$WALLUST" run -q -s -d "$HOME/.config/wallust" --dynamic-threshold "$img"
 
-command -v sketchybar >/dev/null 2>&1 && sketchybar --reload
