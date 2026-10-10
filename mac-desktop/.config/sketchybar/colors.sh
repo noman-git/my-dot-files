@@ -2,12 +2,12 @@
 # Colours as 0xAARRGGBB.
 #
 # The bar has no background. Its items sit in glass capsules like the
-# macOS Control Center tiles (Liquid Glass): dark see-through tint, blur
-# (blur_radius in sketchybarrc), a thin bright edge. The active workspace is
+# macOS Control Center tiles (Liquid Glass): light frosted tint, blur, a soft
+# shadow below (sketchybarrc) and a thin bright edge. The active workspace is
 # a white pill with dark text, like an active Control Center toggle. White
 # text with a soft shadow. Fixed, so it looks the same on every wallpaper.
-export CAPSULE_COLOR=0x59101012     # capsule tint (35% near-black)
-export GLASS_EDGE=0x4dffffff        # 1-point bright edge of capsules and menus
+export CAPSULE_COLOR=0x21ffffff     # capsule tint (13% white): lighter than the wallpaper behind
+export GLASS_EDGE=0x59ffffff        # 1-point bright edge of capsules and menus
 export ACTIVE_COLOR=0xf2ffffff      # active workspace pill
 export ACTIVE_TEXT=0xff1c1c1e       # text on the active workspace pill
 export POPUP_COLOR=0x80101012       # menus: same glass, a little darker
