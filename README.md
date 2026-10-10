@@ -282,12 +282,11 @@ in `hammerspoon/init.lua`.
 
 ### Bar
 
-SketchyBar is a floating glass pill, in the style of macOS Liquid Glass: 8
-points from the screen sides and 4 from the top, a light tint
-(`GLASS_COLOR`), blur 40, a 1-point bright edge and a shadow. Only the bar
-and its menus can blur in SketchyBar, so the whole bar is the glass. The
-colours in `colors.sh` are fixed, so the bar looks the same on every
-wallpaper. The 9
+SketchyBar has no background: the wallpaper or window behind shows
+through. The active workspace pill and the menus use a glass style like
+macOS Liquid Glass (light tint, blur, 1-point bright edge). Text and icons
+are white with a soft shadow for light wallpapers. The colours in
+`colors.sh` are fixed, so the bar looks the same on every wallpaper. The 9
 OmniWM workspaces, each with an icon for every app on it, sit around the
 camera notch: 1 to 5 left of it (position `q`), 6 to 9 right of it (`e`). A
 workspace shows at most 2 app icons, then `+N`, so 6 to 9 do not grow into
@@ -297,7 +296,7 @@ a display without a notch they sit around the middle. The music bars are
 at the far left. `sketchybarrc` starts `plugins/omniwm_watch.sh`, which runs
 `omniwmctl watch` in a loop and sends `omniwm_change` to the bar; this needs
 `ipcEnabled = true` in the OmniWM settings. OmniWM's own workspace bar is
-off. `gaps.outer.top = 42` keeps windows 6 points under the bar, and
+off. `gaps.outer.top = 38` keeps windows 6 points under the bar, and
 `gaps.fullscreenUsesOuterGaps = true` does the same for a single window
 and for `Option+Shift+F`; without it a lone window went under the bar. The app icons come from `font-sketchybar-app-font`;
 `plugins/icon_map.sh` is the app name to icon map from the same release

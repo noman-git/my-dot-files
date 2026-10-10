@@ -11,18 +11,18 @@ FONT="JetBrainsMono Nerd Font"
 # padding_right leaves room for the macOS privacy dot (purple while cava
 # records system audio for the music bars), which macOS draws at the top
 # right above every window.
-# A floating glass pill: 8 points from the screen sides and 4 from the top.
-# Only the bar and its menus can blur what is behind them in SketchyBar, so
-# the whole bar is the glass, not single items. OmniWM keeps windows under it
-# (gaps.outer.top = 42 in settings.toml: 4 + 32 + 6).
-sketchybar --bar position=top height=32 y_offset=4 margin=8 corner_radius=16 \
-  color="$GLASS_COLOR" border_color="$GLASS_EDGE" border_width=1 \
-  blur_radius=40 shadow=on topmost=off sticky=on \
-  padding_left=10 padding_right=26 notch_width=200
+# No bar background: the wallpaper or window behind shows through. The
+# active workspace pill and the menus keep the glass style. OmniWM keeps
+# windows under the bar (gaps.outer.top = 38 in settings.toml: 32 + 6).
+sketchybar --bar position=top height=32 color=0x00000000 border_width=0 \
+  corner_radius=0 margin=0 y_offset=0 blur_radius=0 shadow=off \
+  topmost=off sticky=on padding_left=10 padding_right=26 notch_width=200
 
 sketchybar --default updates=when_shown \
   icon.font="$FONT:Regular:15.0" icon.color="$ICON_COLOR" \
   label.font="$FONT:SemiBold:13.0" label.color="$LABEL_COLOR" \
+  icon.shadow.drawing=on icon.shadow.color="$TEXT_SHADOW" icon.shadow.distance=1 \
+  label.shadow.drawing=on label.shadow.color="$TEXT_SHADOW" label.shadow.distance=1 \
   padding_left=3 padding_right=3 \
   icon.padding_left=6 icon.padding_right=4 \
   label.padding_left=4 label.padding_right=6
