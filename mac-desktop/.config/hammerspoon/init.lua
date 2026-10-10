@@ -37,6 +37,24 @@ local function bind(mods, key, desc, fn)
     table.insert(hammerspoonBinds, { mods = mods, key = key, desc = desc, fn = fn })
 end
 
+-- Start an app through LaunchServices (`open`) with a clean environment.
+-- Started from hs.task directly, an app runs as part of Hammerspoon: macOS
+-- asks permissions (audio, screen) for Hammerspoon, and the app inherits
+-- Hammerspoon's environment, which held TMUX and TERM_PROGRAM=tmux after a
+-- restart from a tmux shell (2026-10-10).
+local CLEAN_ENV = {
+    HOME = os.getenv("HOME"),
+    USER = os.getenv("USER"),
+    PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    LANG = "en_US.UTF-8",
+}
+local function launch(args, callback)
+    local task = hs.task.new("/usr/bin/open", callback, args)
+    task:setEnvironment(CLEAN_ENV)
+    task:start()
+    return task
+end
+
 -- Workspace guard. OmniWM follows macOS app activation: when the last
 -- window on a workspace closes, macOS activates another app and OmniWM
 -- jumps to that app's workspace; when a bind opens a window of an app that
@@ -168,8 +186,9 @@ end
 -- One kitty process for every window, so OmniWM sees one app. `open -na`
 -- started a new kitty process each time.
 bind(mainMod, "return", "terminal", openHere(function()
-    hs.task.new("/Applications/kitty.app/Contents/MacOS/kitty",
-        nil, { "--single-instance", "--directory", os.getenv("HOME") }):start()
+    -- -n starts a new kitty process, which hands the window to the running
+    -- kitty (--single-instance) and exits.
+    launch({ "-n", "-a", "kitty", "--args", "--single-instance", "--directory", os.getenv("HOME") })
 end))
 -- Always a new Finder window: `open ~` only brings up an existing window of
 -- the home folder, on whatever workspace it is. Asks once for Automation
@@ -591,8 +610,14 @@ end)
 -- kitty/.config/kitty/quick-access-terminal.conf. OmniWM's own Quake
 -- terminal (Ghostty) is off.
 bind({ "alt", "shift" }, "return", "drop-down terminal", function()
-    hs.task.new("/Applications/kitty.app/Contents/MacOS/kitten", nil,
-        { "quick-access-terminal", "--detach" }):start()
+    -- No --detach: with it the panel exited together with this task. The
+    -- first press keeps the task running while the panel lives; later presses
+    -- reach that panel (single instance), toggle it and exit.
+    local task = hs.task.new("/Applications/kitty.app/Contents/MacOS/kitten", nil,
+        { "quick-access-terminal" })
+    task:setEnvironment(CLEAN_ENV)
+    task:setWorkingDirectory(os.getenv("HOME"))
+    task:start()
 end)
 
 -- Window cycle, like ALT+Tab on Arch (cycle_next, then bring to top):
@@ -830,4 +855,5 @@ local function saveLocation()
 end
 saveLocation()
 local locationTimer = hs.timer.doEvery(3600, saveLocation)
+
 
