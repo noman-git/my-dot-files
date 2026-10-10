@@ -181,7 +181,9 @@ Tested on an M4 Pro with macOS 27.0.1 (2026-10-10).
 8. Lock when the display sleeps, the same 10 minutes as hypridle on Arch:
    `sysadminctl -screenLock immediate -password -` and
    `sudo pmset -b displaysleep 10` (on power it is 10 already).
-9. Log out and in once, so every app picks up the hidden menu bar.
+9. System Settings > Accessibility > Zoom: turn on "Use scroll gesture with
+   modifier keys to zoom". macOS protects this setting from scripts.
+10. Log out and in once, so every app picks up the hidden menu bar.
 
 What replaces what:
 
@@ -195,13 +197,15 @@ What replaces what:
 | swaync                    | the bell in SketchyBar and the Notification Center |
 | wallust + swww            | `mac-wallpaper <image>` (desktoppr, then wallust for the bar) |
 | xremap                    | Karabiner: Caps Lock tap is Escape, hold is Hyper  |
-| drop-down terminal        | OmniWM Quake terminal (Ghostty)                    |
+| drop-down terminal        | kitty quick access terminal (`kitty/.config/kitty/quick-access-terminal.conf`) |
 | grim, slurp, swappy       | `Cmd+Shift+5` toolbar                              |
 | hyprlock, hypridle        | macOS lock screen and display sleep (step 8)       |
 | hyprsunset                | Night Shift through `nightlight`                   |
 | wlogout                   | power menu (`Ctrl+Option+P`)                       |
 | RofiBeats                 | music menu (`Option+Shift+M`), mpv and yt-dlp      |
 | sticky                    | Stickies                                           |
+| cava                      | cava with Core Audio tap input, colours from wallust |
+| zoom (`SUPER+ALT+scroll`) | macOS Zoom: scroll with a modifier key (step 10)   |
 | nwg-displays              | System Settings > Displays; macOS saves the layout for each set of connected displays |
 
 mainMod is `Option`, the key in the SUPER position on a Mac keyboard, so the
@@ -220,7 +224,8 @@ lists every bind, including all OmniWM binds read from its `settings.toml`.
 | `Option+Space`                | float or tile window                   |
 | `Option+Shift+F`              | fullscreen                             |
 | `Option+A`                    | Overview                               |
-| `Option+Shift+Return`         | drop-down terminal                     |
+| `Option+Shift+Return`         | drop-down terminal (kitty), show or hide |
+| ``Option+` ``, ``Option+Shift+` `` | next, previous window on this workspace (Arch `ALT+Tab`) |
 | `Option+arrows`               | focus                                  |
 | `Ctrl+Option+arrows`          | move window; in Dwindle, toward a neighbour it joins that tile as a tab, on a tab it takes the tab out |
 | `Option+Shift+arrows`         | resize                                 |
@@ -321,6 +326,11 @@ open terminals: without it every wallpaper change turned kitty's green and
 background into dark wallpaper colours, and tmux saved them for each pane.
 To clean panes that got them, send `\033]104\007\033]110\007\033]111\007`
 to each `#{pane_tty}`, or open new panes.
+
+wallust also writes `~/.config/cava/config` from
+`templates/colors-cava`: the Arch gradient, with `method = coreaudio` and
+`source = tap`, which reads the system output without a loopback device
+(macOS 14.2 and later). macOS asks once to let the terminal record audio.
 
 The picker (`Option+W`) lists the JPG, PNG and WebP files under
 `~/Pictures/wallpapers` (not in git, the same path as on Arch), with

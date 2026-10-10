@@ -10,3 +10,6 @@ threshold = 11
 [templates]
 sketchybar.template = 'colors-sketchybar.sh'
 sketchybar.target = '~/.config/sketchybar/wallust-colors.sh'
+
+cava.template = 'colors-cava'
+cava.target = '~/.config/cava/config'

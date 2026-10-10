@@ -56,7 +56,7 @@ stow_packages() {
   # ~/.config/karabiner is left out on purpose: Karabiner replaces
   # karabiner.json on save, which breaks a file link, so stow links the dir.
   mkdir -p "$HOME/.config/omniwm" "$HOME/.config/hammerspoon" "$HOME/.config/kitty" \
-    "$HOME/.config/sketchybar" "$HOME/.config/wallust" "$HOME/.local/bin"
+    "$HOME/.config/sketchybar" "$HOME/.config/wallust" "$HOME/.config/cava" "$HOME/.local/bin"
   local p
   for p in "${STOW_PACKAGES[@]}"; do
     if ! stow -R -v "$p"; then

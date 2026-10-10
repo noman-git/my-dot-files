@@ -450,6 +450,45 @@ bind({ "alt", "shift" }, "d", "dark or light mode", function()
         .. 'to set dark mode to not dark mode')
 end)
 
+-- Drop-down terminal, like Dropterminal.sh (Option+Shift+Return): kitty's
+-- quick access terminal; the same command shows and hides it. Its size is in
+-- kitty/.config/kitty/quick-access-terminal.conf. OmniWM's own Quake
+-- terminal (Ghostty) is off.
+bind({ "alt", "shift" }, "return", "drop-down terminal", function()
+    hs.task.new("/Applications/kitty.app/Contents/MacOS/kitten", nil,
+        { "quick-access-terminal", "--detach" }):start()
+end)
+
+-- Window cycle, like ALT+Tab on Arch (cycle_next, then bring to top):
+-- Option+` focuses the next window on the current OmniWM workspace,
+-- Option+Shift+` the previous one. OmniWM has no focus-by-id command, so
+-- Hammerspoon focuses the window by the id that omniwmctl reports.
+local function cycleWindows(step)
+    local out = hs.execute("/opt/homebrew/bin/omniwmctl query windows --visible --format json")
+    local data = out and hs.json.decode(out)
+    local windows = data and data.result and data.result.payload and data.result.payload.windows or {}
+    local current, list = nil, {}
+    for _, w in ipairs(windows) do
+        if w.isFocused then current = w.workspace and w.workspace.number end
+    end
+    for _, w in ipairs(windows) do
+        if w.workspace and w.workspace.number == current and not w.isScratchpad then
+            table.insert(list, w)
+        end
+    end
+    if #list < 2 then return end
+    for i, w in ipairs(list) do
+        if w.isFocused then
+            local target = list[(i - 1 + step) % #list + 1]
+            local win = hs.window.get(target.windowId)
+            if win then win:focus() end
+            return
+        end
+    end
+end
+bind(mainMod, "`", "next window on this workspace", function() cycleWindows(1) end)
+bind({ "alt", "shift" }, "`", "previous window on this workspace", function() cycleWindows(-1) end)
+
 -- Power menu, like wlogout on Arch (Ctrl+Option+P). Log out, restart and
 -- shut down ask first.
 local function confirmed(action)
