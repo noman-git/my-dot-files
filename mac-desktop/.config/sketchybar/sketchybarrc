@@ -40,16 +40,40 @@ sketchybar --add item front_app left \
     script="$PLUGIN_DIR/front_app.sh" \
   --subscribe front_app front_app_switched
 
+# Right side, from the right edge inwards. A click opens the matching
+# System Settings page or app.
+SETTINGS="x-apple.systempreferences:com.apple"
+
 sketchybar --add item clock right \
-  --set clock update_freq=10 icon=󰥔 script="$PLUGIN_DIR/clock.sh"
+  --set clock update_freq=10 icon=󰥔 script="$PLUGIN_DIR/clock.sh" \
+    click_script="open -a Calendar"
 
 sketchybar --add item battery right \
   --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
+    click_script="open '$SETTINGS.Battery-Settings.extension'" \
   --subscribe battery system_woke power_source_change
 
 sketchybar --add item volume right \
   --set volume script="$PLUGIN_DIR/volume.sh" \
-  --subscribe volume volume_change
+  --subscribe volume volume_change mouse.clicked
+
+sketchybar --add item bluetooth right \
+  --set bluetooth update_freq=30 script="$PLUGIN_DIR/bluetooth.sh" \
+    click_script="open '$SETTINGS.BluetoothSettings'" \
+  --subscribe bluetooth system_woke
+
+sketchybar --add item wifi right \
+  --set wifi update_freq=30 script="$PLUGIN_DIR/wifi.sh" \
+    click_script="open '$SETTINGS.wifi-settings-extension'" \
+  --subscribe wifi wifi_change system_woke
+
+sketchybar --add item memory right \
+  --set memory update_freq=10 icon=󰍛 script="$PLUGIN_DIR/memory.sh" \
+    click_script="open -a 'Activity Monitor'"
+
+sketchybar --add item cpu right \
+  --set cpu update_freq=5 icon=󰻠 script="$PLUGIN_DIR/cpu.sh" \
+    click_script="open -a 'Activity Monitor'"
 
 # One watcher loop per bar start; see plugins/omniwm_watch.sh.
 pkill -f "sketchybar/plugins/omniwm_watch.sh" 2>/dev/null

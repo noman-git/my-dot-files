@@ -228,8 +228,11 @@ bind focuses the app, or opens it if it is not running. The list is `apps` in
 ### Bar and colours
 
 SketchyBar is translucent (`BAR_COLOR` alpha `0x40` plus blur) and shows all
-9 OmniWM workspaces with an icon for each app on them, the front app, volume,
-battery and the clock. The app icons come from `font-sketchybar-app-font`;
+9 OmniWM workspaces with an icon for each app on them and the front app. On
+the right: CPU, memory, Wi-Fi (IP address; macOS hides the network name from
+programs without Location access), Bluetooth (connected devices, through
+`blueutil`), volume (click to mute), battery and the clock. A click on an
+item opens its System Settings page or Activity Monitor. The app icons come from `font-sketchybar-app-font`;
 `plugins/icon_map.sh` is the app name to icon map from the same release
 (v3.0.5). Download the new `icon_map.sh` from
 https://github.com/kvndrsslr/sketchybar-app-font/releases when you update
