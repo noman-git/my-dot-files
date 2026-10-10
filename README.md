@@ -217,9 +217,27 @@ shortcuts. Window binds are in OmniWM; app binds are in Hammerspoon.
 | `Control+Option+L`            | lock screen                            |
 | `Control+Option+Space`        | OmniWM command palette                 |
 | `Caps Lock` (tap)             | Escape                                 |
+| `Option+W`                    | wallpaper picker (`~/Pictures/wallpapers`) |
+| `Control+Option+W`            | random wallpaper                       |
+| `Option+S`                    | web search (Google)                    |
+| `Option+Cmd+E`                | emoji (Raycast)                        |
+| `Option+Cmd+V`                | clipboard history (Raycast)            |
+| `Option+Cmd+C`                | calculator (Raycast root search)       |
+| `Control+Option+S`            | window switcher (Raycast)              |
 | `Hyper+T/B/C/S/D/M/F`         | kitty, Zen, Chrome, Slack, DBeaver, MongoDB Compass, Finder |
 
 Every other OmniWM bind is listed in `settings.toml` under `[[hotkeys]]`.
+
+The Raycast binds are in Hammerspoon, not in Raycast: Raycast keeps its own
+hotkeys in an encrypted database, so they cannot be in git. Hammerspoon opens
+the Raycast commands by deeplink. If a link stops working, select the
+command in Raycast, press `Cmd+Shift+C` (Copy Deeplink) and put the new link
+in `hammerspoon/init.lua`.
+
+The wallpaper picker lists the JPG, PNG and WebP files under
+`~/Pictures/wallpapers` (not in git, the same path as on Arch), with
+thumbnails cached in `~/.cache/wallpaper-thumbs`. A pick runs
+`mac-wallpaper`.
 
 Hyper is `Caps Lock` held (Karabiner sends Ctrl+Option+Shift+Cmd). A Hyper
 bind focuses the app, or opens it if it is not running. The list is `apps` in

@@ -203,3 +203,114 @@ if hs.location.authorizationStatus() == "undetermined" then requestLocation() en
 hs.urlevent.bind("notification-center", function()
     hs.eventtap.keyStroke(hyper, "n", 0)
 end)
+
+-- Wallpaper picker, like WallpaperSelect.sh and WallpaperRandom.sh on Arch.
+-- Images come from ~/Pictures/wallpapers (all subfolders); thumbnails are
+-- cached in ~/.cache/wallpaper-thumbs. A pick runs mac-wallpaper, which
+-- sets the wallpaper and recolours the bar with wallust.
+local WALLPAPER_DIR = os.getenv("HOME") .. "/Pictures/wallpapers"
+local THUMB_DIR = os.getenv("HOME") .. "/.cache/wallpaper-thumbs"
+local MAC_WALLPAPER = os.getenv("HOME") .. "/.local/bin/mac-wallpaper"
+
+local function wallpapers()
+    local out = hs.execute("find '" .. WALLPAPER_DIR .. "' -type f \\( -iname '*.jpg' -o -iname '*.jpeg'"
+        .. " -o -iname '*.png' -o -iname '*.webp' \\) 2>/dev/null | sort") or ""
+    local files = {}
+    for path in out:gmatch("[^\n]+") do table.insert(files, path) end
+    return files
+end
+
+local function thumbPath(path)
+    return THUMB_DIR .. "/" .. hs.hash.MD5(path) .. ".jpg"
+end
+
+local function setWallpaper(path)
+    hs.task.new(MAC_WALLPAPER, function(code, _, err)
+        if code ~= 0 then hs.alert.show("mac-wallpaper failed: " .. (err or "")) end
+    end, { path }):start()
+end
+
+-- Make the missing thumbnails in the background with sips.
+local thumbTask
+local function makeThumbs(files)
+    local missing = {}
+    for _, path in ipairs(files) do
+        if not hs.fs.attributes(thumbPath(path)) then
+            table.insert(missing, string.format("sips -s format jpeg -Z 240 %q --out %q >/dev/null 2>&1",
+                path, thumbPath(path)))
+        end
+    end
+    if #missing == 0 or (thumbTask and thumbTask:isRunning()) then return end
+    hs.fs.mkdir(THUMB_DIR)
+    thumbTask = hs.task.new("/bin/sh", nil, { "-c", table.concat(missing, "; ") })
+    thumbTask:start()
+end
+
+local wallpaperChooser = hs.chooser.new(function(choice)
+    if choice then setWallpaper(choice.path) end
+end)
+wallpaperChooser:placeholderText("Wallpaper")
+wallpaperChooser:rows(8)
+
+bind(mainMod, "w", "wallpaper picker", function()
+    local files = wallpapers()
+    if #files == 0 then
+        hs.alert.show("No images in " .. WALLPAPER_DIR)
+        return
+    end
+    makeThumbs(files)
+    local choices = {}
+    for _, path in ipairs(files) do
+        local thumb = thumbPath(path)
+        table.insert(choices, {
+            text = path:match("([^/]+)$"),
+            subText = path:sub(#WALLPAPER_DIR + 2):match("(.*)/") or "",
+            path = path,
+            image = hs.fs.attributes(thumb) and hs.image.imageFromPath(thumb) or nil,
+        })
+    end
+    wallpaperChooser:choices(choices)
+    wallpaperChooser:show()
+end)
+
+bind({ "ctrl", "alt" }, "w", "random wallpaper", function()
+    local files = wallpapers()
+    if #files == 0 then
+        hs.alert.show("No images in " .. WALLPAPER_DIR)
+        return
+    end
+    setWallpaper(files[math.random(#files)])
+end)
+
+-- Launcher tools on the Arch rofi keys (ALT on Arch is Command here).
+-- Raycast keeps its own hotkeys in an encrypted database, so the keys live
+-- here and open Raycast commands by deeplink.
+local function raycast(command)
+    return whenModifiersUp(function() hs.execute("open -g 'raycast://extensions/raycast/" .. command .. "'") end)
+end
+bind({ "alt", "cmd" }, "e", "emoji", raycast("emoji-symbols/search-emoji-symbols"))
+bind({ "alt", "cmd" }, "v", "clipboard history", raycast("clipboard-history/clipboard-history"))
+bind({ "alt", "ctrl" }, "s", "window switcher", raycast("navigation/switch-windows"))
+-- Raycast's root search calculates as you type.
+bind({ "alt", "cmd" }, "c", "calculator", keys({ "cmd" }, "space"))
+
+-- Web search, like RofiSearch.sh: type a query, Enter opens the browser.
+local searchChooser
+searchChooser = hs.chooser.new(function(choice)
+    if choice then
+        hs.urlevent.openURL("https://www.google.com/search?q=" .. hs.http.encodeForQuery(choice.query))
+    end
+end)
+searchChooser:placeholderText("Search Google")
+searchChooser:queryChangedCallback(function(query)
+    if query == "" then
+        searchChooser:choices({})
+    else
+        searchChooser:choices({ { text = "Search Google for \"" .. query .. "\"", query = query } })
+    end
+end)
+bind(mainMod, "s", "web search", function()
+    searchChooser:query("")
+    searchChooser:choices({})
+    searchChooser:show()
+end)
