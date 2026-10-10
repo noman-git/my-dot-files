@@ -284,13 +284,19 @@ in `hammerspoon/init.lua`.
 
 SketchyBar has no background. Its items sit in glass capsules like the
 macOS Control Center tiles: music, workspaces 1 to 5, workspaces 6 to 9,
-status (Wi-Fi to VPN) and time (weather and clock). Each capsule is a
-SketchyBar bracket with a light frosted tint, its own `blur_radius`, a soft
-shadow and a 1-point bright edge; an empty `spacer.time` item keeps the two right
-capsules apart, because a capsule covers its items' padding. The active
-workspace is a white pill with dark text, like an active Control Center
-toggle. The colours in `colors.sh` are fixed, so the bar looks the same on
-every wallpaper. The 9
+status (Wi-Fi to VPN) and time (weather and clock). SketchyBar itself can
+only draw a flat tint, an edge and a blur, so `glassbar`
+(`helpers/glassbar/main.swift`, built by `install_mac.sh` into
+`~/.local/bin`) draws Apple's real Liquid Glass (`NSGlassEffectView`, macOS
+26 and later) in borderless windows at level -21, just below SketchyBar's
+windows (-20). Each capsule is a transparent SketchyBar bracket; glassbar
+reads its place with `sketchybar --query` once a second, and at once when
+`plugins/workspaces.sh` sends it SIGUSR1. `sketchybarrc` starts it (log in
+`~/.cache/glassbar.log`), and OmniWM does not manage its windows. An empty
+`spacer.time` item keeps the two right capsules apart, because a capsule
+covers its items' padding. The active workspace is a white pill with dark
+text, like an active Control Center toggle. The colours in `colors.sh` are
+fixed, so the bar looks the same on every wallpaper. The 9
 OmniWM workspaces, each with an icon for every app on it, sit around the
 camera notch: 1 to 5 left of it (position `q`), 6 to 9 right of it (`e`). A
 workspace shows at most 2 app icons, then `+N`, so 6 to 9 do not grow into

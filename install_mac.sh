@@ -90,6 +90,13 @@ set_defaults() {
   killall Dock 2>/dev/null || true
 }
 
+build_glassbar() {
+  log "building glassbar (real Liquid Glass behind the SketchyBar capsules)"
+  mkdir -p "$HOME/.local/bin"
+  swiftc -O "$REPO/mac-desktop/.config/sketchybar/helpers/glassbar/main.swift" \
+    -o "$HOME/.local/bin/glassbar" || log "glassbar did not build; the bar works without glass"
+}
+
 seed_colours() {
   [ -f "$HOME/.cache/.current_wallpaper" ] && return
   log "first wallust colours from seed/wallpaper.jpg"
@@ -110,6 +117,7 @@ main() {
   git submodule update --init --recursive
   stow_packages
   [ "$DO_DEFAULTS" = 1 ] && set_defaults
+  build_glassbar
   seed_colours
   start_apps
   log "done. Grant the permissions listed at the top of this script, then log out and in once."

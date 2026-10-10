@@ -58,3 +58,5 @@ for n in 1 2 3 4 5 6 7 8 9; do
 done
 
 sketchybar "${args[@]}"
+# Workspace widths changed: let glassbar move its glass at once.
+pkill -USR1 -x glassbar 2>/dev/null

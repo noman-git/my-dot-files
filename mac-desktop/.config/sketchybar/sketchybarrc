@@ -150,22 +150,29 @@ sketchybar --add item wifi.settings popup.wifi \
   --set wifi.settings icon=󰒓 label="Wi-Fi Settings" \
     click_script="open '$SETTINGS.wifi-settings-extension'; sketchybar --set wifi popup.drawing=off"
 
-# Glass capsules, like the Control Center tiles: a bracket draws one pill
-# behind a group of items, with its own blur.
+# Glass capsules, like the Control Center tiles. Each bracket marks one
+# group; glassbar (helpers/glassbar, built by install_mac.sh into
+# ~/.local/bin) draws real macOS glass (NSGlassEffectView) behind each
+# bracket. SketchyBar alone draws only a flat tint, so the brackets stay
+# transparent; they need a background.height to have a size.
+GLASS_BRACKETS=(glass.music glass.ws.left glass.ws.right glass.status glass.time)
 glass() {
   local name="$1"; shift
   sketchybar --add bracket "$name" "$@" \
-    --set "$name" background.color="$CAPSULE_COLOR" \
-      background.border_color="$GLASS_EDGE" background.border_width=1 \
-      background.corner_radius=14 background.height=28 blur_radius=40 \
-      background.shadow.drawing=on background.shadow.color=0x59000000 \
-      background.shadow.angle=270 background.shadow.distance=3
+    --set "$name" background.color=0x00000000 background.border_width=0 \
+      background.height=28
 }
 glass glass.music cava
 glass glass.ws.left ws.1 ws.2 ws.3 ws.4 ws.5
 glass glass.ws.right ws.6 ws.7 ws.8 ws.9
 glass glass.status wifi bluetooth volume battery notifications vpn
 glass glass.time weather clock
+
+pkill -x glassbar 2>/dev/null
+if [ -x "$HOME/.local/bin/glassbar" ]; then
+  nohup "$HOME/.local/bin/glassbar" "${GLASS_BRACKETS[@]}" >"$HOME/.cache/glassbar.log" 2>&1 &
+  disown
+fi
 
 # One watcher loop per bar start; see plugins/omniwm_watch.sh.
 pkill -f "sketchybar/plugins/omniwm_watch.sh" 2>/dev/null

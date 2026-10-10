@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 # Colours as 0xAARRGGBB.
 #
-# The bar has no background. Its items sit in glass capsules like the
-# macOS Control Center tiles (Liquid Glass): light frosted tint, blur, a soft
-# shadow below (sketchybarrc) and a thin bright edge. The active workspace is
-# a white pill with dark text, like an active Control Center toggle. White
-# text with a soft shadow. Fixed, so it looks the same on every wallpaper.
-export CAPSULE_COLOR=0x21ffffff     # capsule tint (13% white): lighter than the wallpaper behind
-export GLASS_EDGE=0x59ffffff        # 1-point bright edge of capsules and menus
+# The bar has no background. Its items sit in glass capsules that glassbar
+# draws with real macOS Liquid Glass (helpers/glassbar). The active
+# workspace is a white pill with dark text, like an active Control Center
+# toggle. White text with a soft shadow. The menus use SketchyBar's own
+# blur with these colours. Fixed, so it looks the same on every wallpaper.
+export GLASS_EDGE=0x59ffffff        # 1-point bright edge of the menus
 export ACTIVE_COLOR=0xf2ffffff      # active workspace pill
 export ACTIVE_TEXT=0xff1c1c1e       # text on the active workspace pill
 export POPUP_COLOR=0x80101012       # menus: same glass, a little darker
