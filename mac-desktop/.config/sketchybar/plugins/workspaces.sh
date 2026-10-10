@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 # Draw all 9 workspaces: the number, then one icon per app on it
-# (sketchybar-app-font). The focused workspace gets the accent background,
-# empty ones are dimmed. One sketchybar call for all items.
+# (sketchybar-app-font). The current workspace gets the accent background,
+# empty ones are dimmed. Current, not focused: an empty workspace has no
+# focused window, so OmniWM reports isFocused=false for it. One sketchybar
+# call for all items.
 
 CONFIG_DIR="$HOME/.config/sketchybar"
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/plugins/icon_map.sh"
 
-focused="$(omniwmctl query workspaces --format json 2>/dev/null |
-  jq -r '.result.payload.workspaces[] | select(.isFocused) | .number')"
+current="$(omniwmctl query workspaces --format json 2>/dev/null |
+  jq -r '.result.payload.workspaces[] | select(.isCurrent) | .number')"
 
 # One line per workspace with windows: "<number><TAB><app>|<app>|...",
 # each app once, in window order.
@@ -30,7 +32,7 @@ for n in 1 2 3 4 5 6 7 8 9; do
     done
   fi
 
-  if [ "$n" = "$focused" ]; then
+  if [ "$n" = "$current" ]; then
     args+=(--set "ws.$n" background.drawing=on icon.color="$LABEL_COLOR" label.color="$LABEL_COLOR")
   elif [ -n "$icons" ]; then
     args+=(--set "ws.$n" background.drawing=off icon.color="$ICON_COLOR" label.color="$ICON_COLOR")

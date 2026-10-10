@@ -27,8 +27,11 @@ local function whenModifiersUp(fn)
     end
 end
 
+-- hs.hotkey.bind shifts its arguments when the message is not a string, so
+-- (mods, key, nil, fn) makes fn the released function. A string message
+-- shows an alert on every press, so no message is passed.
 local function bind(mods, key, desc, fn)
-    hs.hotkey.bind(mods, key, nil, nil, fn)
+    hs.hotkey.bind(mods, key, nil, fn)
 end
 
 -- One kitty process for every window, so OmniWM sees one app. `open -na`
