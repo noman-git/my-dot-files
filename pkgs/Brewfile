@@ -43,7 +43,7 @@ brew "hashicorp/tap/packer"
 brew "dopplerhq/doppler/doppler"
 cask "session-manager-plugin"
 
-# Desktop: tiling, bar, app binds, keys, launcher, wallpaper, monitor layouts.
+# Desktop: tiling, bar, app binds, keys, launcher, wallpaper, system tools.
 # wallust is not in Homebrew; install_mac.sh runs `cargo install wallust`.
 cask "omniwm"
 brew "felixkratz/formulae/sketchybar"
@@ -51,7 +51,6 @@ cask "hammerspoon"
 cask "karabiner-elements"
 cask "raycast"
 cask "desktoppr"
-brew "displayplacer"
 brew "blueutil"
 brew "switchaudio-osx"
 brew "smudge/smudge/nightlight"

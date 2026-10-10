@@ -187,7 +187,7 @@ What replaces what:
 | SUPER+SHIFT+Return drop-down | OmniWM Quake terminal (Ghostty)                 |
 | grim, slurp, swappy       | `Cmd+Shift+5` toolbar                              |
 | hyprlock, hyprsunset      | lock screen, Night Shift                           |
-| nwg-displays              | System Settings > Displays, or `displayplacer`     |
+| nwg-displays              | System Settings > Displays; macOS saves the layout for each set of connected displays |
 
 mainMod is `Option`, the key in the SUPER position on a Mac keyboard, so the
 binds sit where the Hyprland binds sit. `Command` stays free for app
