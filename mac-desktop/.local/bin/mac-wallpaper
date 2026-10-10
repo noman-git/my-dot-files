@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Set the wallpaper and recolour kitty and SketchyBar from it with wallust.
+# Set the wallpaper and recolour SketchyBar from it with wallust.
 #
 #   mac-wallpaper <image>   set this image on every display, then recolour
 #   mac-wallpaper           recolour from the last image set with this script
@@ -25,6 +25,4 @@ fi
 
 "$WALLUST" run -q -d "$HOME/.config/wallust" --dynamic-threshold "$img"
 
-# kitty rereads its config on SIGUSR1.
-pkill -USR1 -x kitty 2>/dev/null || true
 command -v sketchybar >/dev/null 2>&1 && sketchybar --reload

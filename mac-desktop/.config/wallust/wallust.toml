@@ -8,8 +8,5 @@ palette = "dark16"
 threshold = 11
 
 [templates]
-kitty.template = 'colors-kitty.conf'
-kitty.target = '~/.config/kitty/kitty-themes/01-Wallust.conf'
-
 sketchybar.template = 'colors-sketchybar.sh'
 sketchybar.target = '~/.config/sketchybar/wallust-colors.sh'

@@ -181,7 +181,7 @@ What replaces what:
 | rofi                      | Raycast                                            |
 | cliphist                  | Spotlight clipboard (`Cmd+4`)                      |
 | waybar                    | SketchyBar; the macOS menu bar is hidden           |
-| wallust + swww            | `mac-wallpaper <image>` (desktoppr, then wallust)  |
+| wallust + swww            | `mac-wallpaper <image>` (desktoppr, then wallust for the bar) |
 | xremap                    | Karabiner: Caps Lock tap is Escape, hold is Hyper  |
 | SUPER+SHIFT+Return drop-down | OmniWM Quake terminal (Ghostty)                 |
 | grim, slurp, swappy       | `Cmd+Shift+5` toolbar                              |
@@ -236,9 +236,10 @@ and `gaps.outer.top = 37` keeps windows 4 points under the 33-point bar.
 `mac-wallpaper <image>` sets the wallpaper on every display and runs
 `wallust run -d ~/.config/wallust`. wallust on macOS reads
 `~/Library/Application Support` by default, hence `-d`. It writes
-`~/.config/sketchybar/wallust-colors.sh` and
-`~/.config/kitty/kitty-themes/01-Wallust.conf` (not in git), then reloads
-kitty and SketchyBar. `mac-wallpaper` with no image recolours from the last
+`~/.config/sketchybar/wallust-colors.sh` (not in git), then reloads
+SketchyBar. kitty keeps its own colours: the wallust palette from a dark
+wallpaper made typed text and the tmux-powerline segments hard to read
+(2026-10-10). `mac-wallpaper` with no image recolours from the last
 image. The image path is in `~/.cache/.current_wallpaper`. The OmniWM border
 colour is fixed in `settings.toml`; wallust does not change it.
 

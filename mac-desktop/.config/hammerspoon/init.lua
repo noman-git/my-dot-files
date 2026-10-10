@@ -17,6 +17,16 @@ local function keys(mods, key)
     return function() hs.eventtap.keyStroke(mods, key, 0) end
 end
 
+-- Run fn once every modifier is up. Firefox-based browsers like Zen open
+-- Troubleshoot Mode when Option or Shift is down at launch.
+local function whenModifiersUp(fn)
+    return function()
+        hs.timer.waitUntil(function()
+            return next(hs.eventtap.checkKeyboardModifiers()) == nil
+        end, fn, 0.02)
+    end
+end
+
 local function bind(mods, key, desc, fn)
     hs.hotkey.bind(mods, key, desc, nil, fn)
 end
@@ -28,10 +38,10 @@ bind(mainMod, "return", "terminal", function()
         nil, { "--single-instance", "--directory", os.getenv("HOME") }):start()
 end)
 bind(mainMod, "e", "file manager", sh("open ~"))
-bind(mainMod, "b", "default browser", function()
+bind(mainMod, "b", "default browser", whenModifiersUp(function()
     local id = hs.urlevent.getDefaultHandler("https")
     if id then hs.application.launchOrFocusByBundleID(id) end
-end)
+end))
 
 -- Launcher: Cmd+Space opens Spotlight, or Raycast if Raycast took that key.
 bind(mainMod, "d", "app launcher", keys({ "cmd" }, "space"))
@@ -55,7 +65,9 @@ local apps = {
     f = "com.apple.finder",
 }
 for key, id in pairs(apps) do
-    bind(hyper, key, "focus " .. id, function() hs.application.launchOrFocusByBundleID(id) end)
+    bind(hyper, key, "focus " .. id, whenModifiersUp(function()
+        hs.application.launchOrFocusByBundleID(id)
+    end))
 end
 
 hs.alert.show("Hammerspoon config loaded")
