@@ -200,7 +200,11 @@ Tested on an M4 Pro with macOS 27.0.1 (2026-10-10).
    `sudo pmset -b displaysleep 10` (on power it is 10 already).
 9. System Settings > Accessibility > Zoom: turn on "Use scroll gesture with
    modifier keys to zoom". macOS protects this setting from scripts.
-10. Log out and in once, so every app picks up the hidden menu bar.
+10. System Settings > Trackpad > More Gestures: set "Swipe between
+    full-screen applications" to four fingers. Three fingers left and right
+    then switch OmniWM workspaces. install_mac.sh writes this setting, but
+    macOS reads it only after you log in again.
+11. Log out and in once, so every app picks up the hidden menu bar.
 
 What replaces what:
 
@@ -246,7 +250,7 @@ lists every bind, including all OmniWM binds read from its `settings.toml`.
 | `Option+arrows`               | focus                                  |
 | `Ctrl+Option+arrows`          | move window; in Dwindle, toward a neighbour it joins that tile as a tab, on a tab it takes the tab out |
 | `Option+Shift+arrows`         | resize                                 |
-| `Option+1..9`                 | workspace                              |
+| `Option+1..9`                 | workspace; again on that workspace, back to the one before (Hammerspoon) |
 | `Option+Shift+1..9`           | move window to workspace and follow it |
 | `Option+Tab`, `Option+Shift+Tab` | next, previous workspace            |
 | `Option+U`, `Option+Shift+U`  | scratchpad (special workspace)         |

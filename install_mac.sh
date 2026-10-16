@@ -91,6 +91,18 @@ set_defaults() {
   # Turn off the drag-to-edge window tiling of macOS 15 and later; it fights OmniWM.
   defaults write com.apple.WindowManager EnableTilingByEdgeDrag -bool false
   defaults write com.apple.WindowManager EnableTopTilingByEdgeDrag -bool false
+  # No zoom animation when a window opens: the new window shows at full size
+  # and OmniWM moves it to its tile sooner. Finder has its own animations.
+  defaults write NSGlobalDomain NSAutomaticWindowAnimationsEnabled -bool false
+  defaults write com.apple.finder DisableAllAnimations -bool true
+  # Three-finger left and right swipe goes to OmniWM (workspaces, like the
+  # Hyprland gesture); the macOS swipe between full-screen apps moves to four
+  # fingers. Built-in and Bluetooth trackpads have separate domains.
+  local tp
+  for tp in com.apple.AppleMultitouchTrackpad com.apple.driver.AppleBluetoothMultitouch.trackpad; do
+    defaults write "$tp" TrackpadThreeFingerHorizSwipeGesture -int 0
+    defaults write "$tp" TrackpadFourFingerHorizSwipeGesture -int 2
+  done
   # Hide the menu bar; SketchyBar takes its place. Apps pick this up on relaunch.
   defaults write NSGlobalDomain _HIHideMenuBar -bool true
   # Show Notification Center on Hyper+N (symbolic hotkey 163, off by default).
@@ -99,6 +111,7 @@ set_defaults() {
     '<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>110</integer><integer>45</integer><integer>1966080</integer></array><key>type</key><string>standard</string></dict></dict>'
   /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u || true
   killall Dock 2>/dev/null || true
+  killall Finder 2>/dev/null || true
 }
 
 build_glassbar() {

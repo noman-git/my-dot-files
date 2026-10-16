@@ -30,7 +30,7 @@ maxTotalBytes = 67108864
 defaultSplitRatio = 1.0
 moveToRootStable = true
 singleWindowFit = "fill"
-smartSplit = true
+smartSplit = false
 splitWidthMultiplier = 1.0
 useGlobalGaps = true
 
@@ -54,8 +54,8 @@ right = 4.0
 top = 38.0
 
 [general]
-animationSpeed = 1.0
-animationsEnabled = true
+animationSpeed = 2.0
+animationsEnabled = false
 defaultLayoutType = "dwindle"
 hotkeysEnabled = true
 hyperKeyModifiers = "Control+Option+Shift+Command"
@@ -80,8 +80,8 @@ windowMoveEnabled = false
 windowMoveFingerCount = 4
 windowResizeEnabled = false
 windowResizeFingerCount = 3
-workspaceSwipeAxis = "vertical"
-workspaceSwipeEnabled = false
+workspaceSwipeAxis = "horizontal"
+workspaceSwipeEnabled = true
 workspaceSwipeFingerCount = 3
 
 [hiddenBar]
@@ -384,7 +384,7 @@ binding = "Unassigned"
 id = "assignFocusedWindowToScratchpad.10"
 
 [[hotkeys]]
-binding = "Option+1"
+binding = "Unassigned"
 id = "switchWorkspace.0"
 
 [[hotkeys]]
@@ -392,7 +392,7 @@ binding = "Option+Shift+1"
 id = "moveToWorkspace.0"
 
 [[hotkeys]]
-binding = "Option+2"
+binding = "Unassigned"
 id = "switchWorkspace.1"
 
 [[hotkeys]]
@@ -400,7 +400,7 @@ binding = "Option+Shift+2"
 id = "moveToWorkspace.1"
 
 [[hotkeys]]
-binding = "Option+3"
+binding = "Unassigned"
 id = "switchWorkspace.2"
 
 [[hotkeys]]
@@ -408,7 +408,7 @@ binding = "Option+Shift+3"
 id = "moveToWorkspace.2"
 
 [[hotkeys]]
-binding = "Option+4"
+binding = "Unassigned"
 id = "switchWorkspace.3"
 
 [[hotkeys]]
@@ -416,7 +416,7 @@ binding = "Option+Shift+4"
 id = "moveToWorkspace.3"
 
 [[hotkeys]]
-binding = "Option+5"
+binding = "Unassigned"
 id = "switchWorkspace.4"
 
 [[hotkeys]]
@@ -424,7 +424,7 @@ binding = "Option+Shift+5"
 id = "moveToWorkspace.4"
 
 [[hotkeys]]
-binding = "Option+6"
+binding = "Unassigned"
 id = "switchWorkspace.5"
 
 [[hotkeys]]
@@ -432,7 +432,7 @@ binding = "Option+Shift+6"
 id = "moveToWorkspace.5"
 
 [[hotkeys]]
-binding = "Option+7"
+binding = "Unassigned"
 id = "switchWorkspace.6"
 
 [[hotkeys]]
@@ -440,7 +440,7 @@ binding = "Option+Shift+7"
 id = "moveToWorkspace.6"
 
 [[hotkeys]]
-binding = "Option+8"
+binding = "Unassigned"
 id = "switchWorkspace.7"
 
 [[hotkeys]]
@@ -448,7 +448,7 @@ binding = "Option+Shift+8"
 id = "moveToWorkspace.7"
 
 [[hotkeys]]
-binding = "Option+9"
+binding = "Unassigned"
 id = "switchWorkspace.8"
 
 [[hotkeys]]
