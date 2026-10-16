@@ -265,7 +265,7 @@ lists every bind, including all OmniWM binds read from its `settings.toml`.
 | `Option+Shift+W`              | wallpaper effects                      |
 | `Ctrl+Option+W`               | random wallpaper                       |
 | `Option+Shift+M`              | music: online stations and ~/Music     |
-| `Ctrl+Option+Cmd+B`           | show or hide the bar (and its glass)   |
+| `Ctrl+Option+Cmd+B`           | show or hide the bar (and its glass) until the next workspace or window change |
 | `Option+Cmd+R`                | reload the bar, glassbar and Hammerspoon |
 | `Option+Cmd+U`                | `brew update && brew upgrade` in a new kitty window |
 | `Option+S`                    | web search (Google)                    |
@@ -345,6 +345,11 @@ and for `Option+Shift+F`; without it a lone window went under the bar. The app i
 (v3.0.5). Download the new `icon_map.sh` from
 https://github.com/kvndrsslr/sketchybar-app-font/releases when you update
 the font, or new apps show no icon.
+
+The whole bar, with its glass, hides while the focused workspace has no
+windows and comes back with the first window (`plugins/workspaces.sh`). It
+is one bar for all displays, so with two displays it follows the workspace
+that has the focus.
 
 On the right, from the right edge: clock, weather, VPN, bell, battery,
 volume, Bluetooth, Wi-Fi.

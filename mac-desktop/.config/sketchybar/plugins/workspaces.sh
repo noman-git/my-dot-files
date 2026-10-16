@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Draw all 9 workspaces: the number, then one icon per app on it
 # (sketchybar-app-font). The current workspace is a white pill with dark text,
-# empty ones are dimmed. Current, not focused: an empty workspace has no
+# empty ones are dimmed, and the whole bar hides while the focused workspace
+# is empty. Current, not focused: an empty workspace has no
 # focused window, so OmniWM reports isFocused=false for it. One sketchybar
 # call for all items.
 
@@ -10,8 +11,12 @@ source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/plugins/icon_map.sh"
 MAX_ICONS=2
 
+# One current workspace per display (one line each), and the one with the
+# focus.
 current="$(omniwmctl query workspaces --format json 2>/dev/null |
   jq -r '.result.payload.workspaces[] | select(.isCurrent) | .number')"
+focused="$(omniwmctl query active-workspace --format json 2>/dev/null |
+  jq -r '.result.payload.workspace.number // empty')"
 
 # One line per workspace with windows: "<number><TAB><app>|<app>|...",
 # each app once, in window order.
@@ -39,7 +44,7 @@ for n in 1 2 3 4 5 6 7 8 9; do
     [ "${#names[@]}" -gt "$MAX_ICONS" ] && icons+="+$(( ${#names[@]} - MAX_ICONS )) "
   fi
 
-  if [ "$n" = "$current" ]; then
+  if printf '%s\n' "$current" | grep -qx "$n"; then
     args+=(--set "ws.$n" background.drawing=on icon.color="$ACTIVE_TEXT" label.color="$ACTIVE_TEXT"
       icon.shadow.drawing=off label.shadow.drawing=off)
   elif [ -n "$icons" ]; then
@@ -58,6 +63,19 @@ for n in 1 2 3 4 5 6 7 8 9; do
     args+=(label="" label.drawing=off label.padding_right=0)
   fi
 done
+
+# The bar hides while the focused workspace is empty and comes back when it
+# has a window. It is one bar for all displays, so this goes by the
+# workspace with the focus.
+if [ -n "$focused" ]; then
+  focused_apps="$(printf '%s\n' "$apps_by_ws" | awk -F'\t' -v n="$focused" '$1 == n { print $2 }')"
+  if [ -z "$focused_apps" ]; then want=on; else want=off; fi
+  if [ "$(sketchybar --query bar | jq -r .hidden)" != "$want" ]; then
+    args+=(--bar hidden="$want")
+    # Hide the glass first, so it goes with the text (glassbar SIGUSR2).
+    [ "$want" = on ] && pkill -USR2 -x glassbar 2>/dev/null
+  fi
+fi
 
 sketchybar "${args[@]}"
 # Workspace widths changed: let glassbar move its glass at once.
