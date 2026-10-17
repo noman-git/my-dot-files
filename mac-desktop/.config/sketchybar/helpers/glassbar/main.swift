@@ -99,6 +99,8 @@ func makePanel(level: NSWindow.Level = glassLevel, tint: NSColor = glassTint) ->
     panel.isOpaque = false
     panel.backgroundColor = .clear
     panel.hasShadow = false
+    // No fade on show and hide: the glass must go and come with the text.
+    panel.animationBehavior = .none
     panel.ignoresMouseEvents = true
     panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
     let glass = NSGlassEffectView()
@@ -132,6 +134,17 @@ func refreshMenus() {
     }
 }
 
+// Hide the capsule glass but keep the windows and their places, so it can
+// come back at once with the bar.
+func hideAll() {
+    for (_, panel) in panels { panel.orderOut(nil) }
+}
+
+// After SIGUSR2 (the bar is about to hide) no glass is shown for 0.15 s:
+// SketchyBar applies the hidden state a moment after the signal, and a
+// refresh in that moment still saw the bar visible.
+var holdHiddenUntil = Date.distantPast
+
 // The bar can be hidden (Ctrl+Option+Cmd+B); its glass hides with it.
 func barHidden() -> Bool {
     let task = Process()
@@ -147,33 +160,69 @@ func barHidden() -> Bool {
     return (json?["hidden"] as? String) == "on"
 }
 
+// The queries run one `sketchybar` process each and together take 0.4 to
+// 0.9 s, so they run on this queue; on the main thread they held back the
+// SIGUSR2 hide and the glass went 0.5 s after the bar's text.
+let queryQueue = DispatchQueue(label: "glassbar.query")
+var refreshRunning = false
+var refreshAgain = false
+// Goes up on each SIGUSR2: a refresh that started before it must not show
+// the glass again.
+var hideGeneration = 0
+
+func glassMayShow(_ generation: Int) -> Bool {
+    generation == hideGeneration && Date() >= holdHiddenUntil
+}
+
 func refresh() {
+    if refreshRunning { refreshAgain = true; return }
+    refreshRunning = true
+    let generation = hideGeneration
+    queryQueue.async {
+        let hidden = barHidden()
+        DispatchQueue.main.sync {
+            if hidden || !glassMayShow(generation) { hideAll(); return }
+            // Back from hidden: show the glass at its last places at once,
+            // so it appears with the bar's text; the queries below then
+            // correct it.
+            for (_, panel) in panels where !panel.isVisible { panel.orderFrontRegardless() }
+        }
+        var rects: [(String, NSRect)] = []
+        if !hidden {
+            for name in brackets {
+                for (display, r) in query(name) { rects.append((name + "|" + display, r)) }
+            }
+        }
+        DispatchQueue.main.async {
+            if !hidden { place(rects, generation) }
+            refreshRunning = false
+            if refreshAgain { refreshAgain = false; refresh() }
+        }
+    }
+}
+
+func place(_ rects: [(String, NSRect)], _ generation: Int) {
+    guard glassMayShow(generation) else { hideAll(); return }
     // SketchyBar reports top-left screen coordinates; AppKit counts from the
     // bottom-left of the main screen.
     guard let mainHeight = NSScreen.screens.first?.frame.height else { return }
     var seen = Set<String>()
-    if barHidden() {
-        for (_, panel) in panels { panel.orderOut(nil) }
-        panels.removeAll()
-        return
+    for (key, r) in rects {
+        seen.insert(key)
+        let inset = max(0, (r.height - pillHeight) / 2)
+        let frame = NSRect(x: r.minX, y: mainHeight - r.maxY + inset,
+                           width: r.width, height: r.height - 2 * inset)
+        let panel = panels[key] ?? makePanel()
+        panels[key] = panel
+        if panel.frame != frame { panel.setFrame(frame, display: true) }
+        (panel.contentView as? NSGlassEffectView)?.cornerRadius = frame.height / 2
+        if !panel.isVisible { panel.orderFrontRegardless() }
     }
-    for name in brackets {
-        for (display, r) in query(name) {
-            let key = name + "|" + display
-            seen.insert(key)
-            let inset = max(0, (r.height - pillHeight) / 2)
-            let frame = NSRect(x: r.minX, y: mainHeight - r.maxY + inset,
-                               width: r.width, height: r.height - 2 * inset)
-            let panel = panels[key] ?? makePanel()
-            panels[key] = panel
-            if panel.frame != frame { panel.setFrame(frame, display: true) }
-            (panel.contentView as? NSGlassEffectView)?.cornerRadius = frame.height / 2
-            if !panel.isVisible { panel.orderFrontRegardless() }
-        }
-    }
+    // A capsule that SketchyBar has not placed yet (for a moment after the
+    // bar comes back) only hides its glass; deleting it made that pill come
+    // back a second late.
     for (key, panel) in panels where !seen.contains(key) {
         panel.orderOut(nil)
-        panels[key] = nil
     }
 }
 
@@ -250,8 +299,24 @@ if CommandLine.arguments.dropFirst().first == "--demo" {
 }
 
 let usr1 = DispatchSource.makeSignalSource(signal: SIGUSR1, queue: .main)
-usr1.setEventHandler { refresh() }
+usr1.setEventHandler {
+    refresh()
+    // Once more after SketchyBar has laid out the change.
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { refresh() }
+}
 usr1.resume()
+
+// SIGUSR2: the bar is about to hide (plugins/workspaces.sh sends it just
+// before), so hide the glass now without asking SketchyBar first; the
+// glass then goes away with the bar's text instead of after it.
+signal(SIGUSR2, SIG_IGN)
+let usr2 = DispatchSource.makeSignalSource(signal: SIGUSR2, queue: .main)
+usr2.setEventHandler {
+    hideGeneration += 1
+    holdHiddenUntil = Date().addingTimeInterval(0.15)
+    hideAll()
+}
+usr2.resume()
 
 let timer = Timer(timeInterval: 1.0, repeats: true) { _ in refresh() }
 RunLoop.main.add(timer, forMode: .common)

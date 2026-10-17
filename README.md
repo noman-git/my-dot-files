@@ -200,7 +200,11 @@ Tested on an M4 Pro with macOS 27.0.1 (2026-10-10).
    `sudo pmset -b displaysleep 10` (on power it is 10 already).
 9. System Settings > Accessibility > Zoom: turn on "Use scroll gesture with
    modifier keys to zoom". macOS protects this setting from scripts.
-10. Log out and in once, so every app picks up the hidden menu bar.
+10. System Settings > Trackpad > More Gestures: set "Swipe between
+    full-screen applications" to four fingers. Three fingers left and right
+    then switch OmniWM workspaces. install_mac.sh writes this setting, but
+    macOS reads it only after you log in again.
+11. Log out and in once, so every app picks up the hidden menu bar.
 
 What replaces what:
 
@@ -246,7 +250,7 @@ lists every bind, including all OmniWM binds read from its `settings.toml`.
 | `Option+arrows`               | focus                                  |
 | `Ctrl+Option+arrows`          | move window; in Dwindle, toward a neighbour it joins that tile as a tab, on a tab it takes the tab out |
 | `Option+Shift+arrows`         | resize                                 |
-| `Option+1..9`                 | workspace                              |
+| `Option+1..9`                 | workspace; again on that workspace, back to the one before (Hammerspoon) |
 | `Option+Shift+1..9`           | move window to workspace and follow it |
 | `Option+Tab`, `Option+Shift+Tab` | next, previous workspace            |
 | `Option+U`, `Option+Shift+U`  | scratchpad (special workspace)         |
@@ -265,7 +269,7 @@ lists every bind, including all OmniWM binds read from its `settings.toml`.
 | `Option+Shift+W`              | wallpaper effects                      |
 | `Ctrl+Option+W`               | random wallpaper                       |
 | `Option+Shift+M`              | music: online stations and ~/Music     |
-| `Ctrl+Option+Cmd+B`           | show or hide the bar (and its glass)   |
+| `Ctrl+Option+Cmd+B`           | show or hide the bar (and its glass) until the next workspace or window change |
 | `Option+Cmd+R`                | reload the bar, glassbar and Hammerspoon |
 | `Option+Cmd+U`                | `brew update && brew upgrade` in a new kitty window |
 | `Option+S`                    | web search (Google)                    |
@@ -345,6 +349,11 @@ and for `Option+Shift+F`; without it a lone window went under the bar. The app i
 (v3.0.5). Download the new `icon_map.sh` from
 https://github.com/kvndrsslr/sketchybar-app-font/releases when you update
 the font, or new apps show no icon.
+
+The whole bar, with its glass, hides while the focused workspace has no
+windows and comes back with the first window (`plugins/workspaces.sh`). It
+is one bar for all displays, so with two displays it follows the workspace
+that has the focus.
 
 On the right, from the right edge: clock, weather, VPN, bell, battery,
 volume, Bluetooth, Wi-Fi.

@@ -171,6 +171,23 @@ local guardKeyTap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, functio
 end)
 guardKeyTap:start()
 
+-- Option+1..9: go to that workspace; on it already, go back to the one before
+-- (Hyprland workspace_back_and_forth). OmniWM has no setting for this, so
+-- these keys are unassigned in its settings.toml. They run on key down like
+-- the OmniWM binds, not on key up like bind().
+for n = 1, 9 do
+    local function go()
+        if omniwm.active == n then
+            omniwmCommand({ "command", "switch-workspace", "back-and-forth" })
+        else
+            omniwmCommand({ "command", "switch-workspace", tostring(n) })
+        end
+    end
+    hs.hotkey.new(mainMod, tostring(n), go):enable()
+    table.insert(hammerspoonBinds, { mods = mainMod, key = tostring(n),
+        desc = "workspace " .. n .. ", again: back to the one before", fn = go })
+end
+
 -- Short-lived system UI (screenshot, Raycast, Spotlight): when it closes,
 -- macOS gives the focus back to the app that had it, and OmniWM jumps to
 -- that app's workspace even when you were on another (empty) one. When the
