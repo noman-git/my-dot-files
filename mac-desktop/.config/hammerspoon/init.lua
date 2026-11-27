@@ -994,10 +994,23 @@ local cavaTimer = hs.timer.doEvery(2, function()
 end)
 
 -- Claude Code notifications, from the hooks in ~/.claude/settings.json
--- (mac-desktop/.local/bin/claude-notify). A question or permission request
--- plays a sound; a finished task is silent. A click brings kitty forward.
+-- (claude/.local/bin/claude-notify). A question or permission request
+-- plays a sound; a finished task is silent. A click brings kitty forward
+-- and, when the hook sent a tmux socket and pane, switches the tmux client
+-- to that pane.
+local TMUX = "/opt/homebrew/bin/tmux"
+
 hs.urlevent.bind("claude-notify", function(_, params)
+    local socket, pane = params.socket, params.pane
     local n = hs.notify.new(function()
+        if socket and pane and pane:match("^%%%d+$") then
+            hs.task.new(TMUX, nil, {
+                "-S", socket,
+                "switch-client", "-t", pane, ";",
+                "select-window", "-t", pane, ";",
+                "select-pane", "-t", pane,
+            }):start()
+        end
         hs.application.launchOrFocusByBundleID("net.kovidgoyal.kitty")
     end, {
         title = params.title or "Claude Code",

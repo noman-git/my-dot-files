@@ -2,8 +2,9 @@
 # Claude Code hook (Notification and Stop events, claude/.claude/settings.json):
 # reads the hook JSON from stdin and shows a notification. macOS: through
 # Hammerspoon (hammerspoon://claude-notify); a click brings kitty to the
-# front. Linux: notify-send. Hooks run with a plain PATH, so jq is looked up
-# in the Homebrew and system places.
+# front and, when Claude runs in tmux, switches to its pane. Linux:
+# notify-send. Hooks run with a plain PATH, so jq is looked up in the
+# Homebrew and system places.
 
 JQ="$(command -v /opt/homebrew/bin/jq /usr/bin/jq jq 2>/dev/null | head -1)"
 [ -n "$JQ" ] || exit 0
@@ -26,5 +27,9 @@ if [ "$(uname -s)" != "Darwin" ]; then
   exit 0
 fi
 
-url="hammerspoon://claude-notify?title=$("$JQ" -rn --arg s "$title" '$s|@uri')&body=$("$JQ" -rn --arg s "$body" '$s|@uri')&event=$event"
+uri() { "$JQ" -rn --arg s "$1" '$s|@uri'; }
+url="hammerspoon://claude-notify?title=$(uri "$title")&body=$(uri "$body")&event=$event"
+if [ -n "$TMUX" ] && [ -n "$TMUX_PANE" ]; then
+  url="$url&socket=$(uri "${TMUX%%,*}")&pane=$(uri "$TMUX_PANE")"
+fi
 open -g "$url"
