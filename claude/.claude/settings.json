@@ -1,5 +1,4 @@
 {
-  "theme": "dark",
   "attribution": {
     "commit": "",
     "pr": "",
@@ -28,9 +27,7 @@
       "mcp__claude_ai_Slack__slack_complete_file_upload"
     ]
   },
-  "enabledPlugins": {
-    "lua-lsp@claude-plugins-official": true
-  },
+  "model": "opus",
   "hooks": {
     "Notification": [
       {
@@ -38,8 +35,8 @@
           {
             "type": "command",
             "command": "$HOME/.local/bin/claude-notify",
-            "async": true,
-            "timeout": 10
+            "timeout": 10,
+            "async": true
           }
         ]
       }
@@ -50,11 +47,49 @@
           {
             "type": "command",
             "command": "$HOME/.local/bin/claude-notify",
-            "async": true,
-            "timeout": 10
+            "timeout": 10,
+            "async": true
           }
         ]
       }
     ]
-  }
+  },
+  "enabledPlugins": {
+    "lua-lsp@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "context-bar@claude-code-mods": true,
+    "browser-lanes@claude-code-mods": true,
+    "heatmap@claude-code-mods": true,
+    "mission-control@claude-code-mods": true,
+    "replay-theater@claude-code-mods": true,
+    "open-paths@open-paths": true,
+    "workflow-conductor@workflow-conductor": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-code-mods": {
+      "source": {
+        "source": "github",
+        "repo": "hamzafer/claude-code-mods"
+      }
+    },
+    "open-paths": {
+      "source": {
+        "source": "github",
+        "repo": "kiankhooban/open-paths"
+      }
+    },
+    "workflow-conductor": {
+      "source": {
+        "source": "github",
+        "repo": "bruw/workflow-conductor"
+      }
+    }
+  },
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
+  "skipWorkflowUsageWarning": true,
+  "theme": "dark"
 }
